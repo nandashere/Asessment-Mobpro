@@ -5,7 +5,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -17,7 +21,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import com.anandamartiza0128.makanapaya.navigation.Screen
 import com.anandamartiza0128.makanapaya.navigation.SetupNavGraph
 import com.anandamartiza0128.makanapaya.ui.theme.MakanApaYaTheme
 
@@ -35,7 +43,7 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen() {
+fun MainScreen(navController: NavHostController) {
     val context = LocalContext.current                                           // akses resources dari Android framework(color.xml, string.xml,dll.)
     val ceriseColor = Color(ContextCompat.getColor(context, R.color.cerise))    // pakai warna dari file colors.xml
     Scaffold(
@@ -47,20 +55,42 @@ fun MainScreen() {
                 colors = TopAppBarDefaults.mediumTopAppBarColors(
                     containerColor = ceriseColor,
                     titleContentColor = Color.White,
-                )
+                ),
             )
         }
     ) { innerPadding ->
-        ScreenContent(Modifier.padding(innerPadding))
+        ScreenContent(
+            modifier = Modifier.padding(innerPadding),
+            navController = navController
+        )
     }
 }
 
 @Composable
-fun ScreenContent(modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello Android!",
-        modifier = modifier
-    )
+fun ScreenContent(modifier: Modifier = Modifier, navController: NavHostController) {
+    val context = LocalContext.current
+    val yellowColor = Color(ContextCompat.getColor(context, R.color.yellow))
+
+    Column(modifier = modifier.padding(16.dp)) {
+        Text(
+            text = "Hello Android!",
+            modifier = modifier
+        )
+        Button(
+            onClick = {
+                navController.navigate(Screen.Foodlist.route)       // dapat diletakkan di komponen manapun sesuai kebutuhan (button yg memerlukan navigasi)
+            },
+            modifier = Modifier.padding(top = 8.dp),
+            contentPadding = PaddingValues(horizontal = 32.dp, vertical = 16.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = yellowColor,
+                contentColor = Color.White
+            )
+        ) {
+            Text(text = stringResource(R.string.tombol_foodlist))
+        }
+
+    }
 }
 
 @Preview(showBackground = true)
@@ -68,6 +98,6 @@ fun ScreenContent(modifier: Modifier = Modifier) {
 @Composable
 fun MainScreenPreview() {
     MakanApaYaTheme {
-        MainScreen()
+        MainScreen(rememberNavController())
     }
 }
