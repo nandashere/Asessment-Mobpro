@@ -5,4 +5,6 @@ package com.anandamartiza0128.makanapaya.navigation
 sealed class Screen(val route: String) {
     data object Home: Screen("mainScreen")
     data object Foodlist: Screen("foodlistScreen")
+    data object TambahMakanan: Screen(route = "tambahMakananScreen")
+    data object CariMakanan: Screen(route = "cariMakananScreen")
 }

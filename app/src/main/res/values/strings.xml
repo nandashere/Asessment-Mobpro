@@ -1,6 +1,16 @@
 <resources>
+
+    //page name
     <string name="app_name">Makan Apa Ya</string>
-    <string name="tombol_foodlist">Lihat Foodlist</string>
+    <string name="tambah_makanan">Tambah Makanan</string>
+    <string name="cari_makanan">Cari Makanan</string>
     <string name="foodlist">Foodlist Saya</string>
+
+    //buttons
+    <string name="tombol_tambah_makanan">Tambah Makanan</string>
+    <string name="tombol_cari_makanan">Cari Makanan</string>
+    <string name="tombol_foodlist">Lihat Foodlist</string>
+
+    //page desc
     <string name="my_foodlist">Ayam Geprek, Gacoan, Ayam Penyet</string>
 </resources>

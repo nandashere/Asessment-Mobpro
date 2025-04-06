@@ -17,14 +17,14 @@ import com.anandamartiza0128.makanapaya.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FoodlistScreen() {
+fun TambahMakananScreen() {
     val context = LocalContext.current                                           // akses resources dari Android framework(color.xml, string.xml,dll.)
     val ceriseColor = Color(ContextCompat.getColor(context, R.color.cerise))    // pakai warna dari file colors.xml
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(text = stringResource(id = R.string.foodlist))
+                    Text(text = stringResource(id = R.string.tambah_makanan))
                 },
                 colors = TopAppBarDefaults.mediumTopAppBarColors(
                     containerColor = ceriseColor,
