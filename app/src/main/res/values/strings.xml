@@ -13,4 +13,26 @@
 
     //page desc
     <string name="my_foodlist">Ayam Geprek, Gacoan, Ayam Penyet</string>
+
+    <!-- Deskripsi Rasa & Tipe -->
+    <string name="rasa_gurih">Gurih</string>
+    <string name="rasa_pedas">Pedas</string>
+    <string name="tipe_berat">Makanan Berat</string>
+    <string name="tekstur_kering">Kering</string>
+
+    <!-- Tindakan -->
+    <string name="edit">Edit</string>
+    <string name="delete">Hapus</string>
+
+    <!-- Makanan -->
+    <string name="makanan_ayam_geprek">Ayam Geprek</string>
+    <string name="makanan_gacoan">Gacoan</string>
+    <string name="makanan_ayam_penyet">Ayam Penyet</string>
+
+    <!-- Content Description (aksesibilitas) -->
+    <string name="icon_back">Kembali</string>
+    <string name="icon_edit">Edit item</string>
+    <string name="icon_delete">Hapus item</string>
+    <string name="image_content_desc">Foto makanan %1$s</string>
+    <string name="share_foodlist">Bagikan Foodlist</string>
 </resources>
