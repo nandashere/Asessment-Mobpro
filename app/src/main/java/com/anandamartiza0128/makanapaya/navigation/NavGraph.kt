@@ -22,7 +22,7 @@ fun SetupNavGraph(navController: NavHostController = rememberNavController()) {
             FoodlistScreen(navController)
         }
         composable(route = Screen.TambahMakanan.route) {
-            TambahMakananScreen()
+            TambahMakananScreen(navController = navController)
         }
         composable(route = Screen.CariMakanan.route) {
             CariMakananScreen()
