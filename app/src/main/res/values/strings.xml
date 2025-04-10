@@ -35,4 +35,15 @@
     <string name="icon_delete">Hapus item</string>
     <string name="image_content_desc">Foto makanan %1$s</string>
     <string name="share_foodlist">Bagikan Foodlist</string>
+
+    <string name="title_tambah_makanan">Makanan Saya</string>
+    <string name="back">Back</string>
+    <string name="masukkan_gambar">Masukkan Gambar</string>
+    <string name="tambahkan_gambar">Tambahkan Gambar</string>
+    <string name="nama_makanan">Nama makanan</string>
+    <string name="jenis_makanan">Jenis Makanan</string>
+    <string name="rasa_makanan">Rasa Makanan</string>
+    <string name="tingkat_kepedasan">Tingkat Kepedasan</string>
+    <string name="tekstur_makanan">Tekstur Makanan</string>
+
 </resources>

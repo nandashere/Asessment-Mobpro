@@ -44,6 +44,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -109,7 +110,7 @@ fun TambahMakananScreen(navController: NavController) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Masukkan Gambar",
+                text = stringResource(R.string.masukkan_gambar),
                 style = MaterialTheme.typography.labelLarge,
                 modifier = Modifier.padding(vertical = 8.dp)
             )
@@ -141,36 +142,36 @@ fun TambahMakananScreen(navController: NavController) {
             TextButton(onClick = {
                 launcher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
             }) {
-                Text("Tambahkan Gambar", color = ceriseColor)
+                Text(stringResource(R.string.tambahkan_gambar), color = ceriseColor)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            FormField(label = "Nama makanan", value = namaMakanan, onValueChange = { namaMakanan = it })
+            FormField(label = stringResource(R.string.nama_makanan), value = namaMakanan, onValueChange = { namaMakanan = it })
 
             DropDownField(
-                label = "Jenis Makanan", value = jenisMakanan, expanded = expandedJenis,
+                label = stringResource(R.string.jenis_makanan), value = jenisMakanan, expanded = expandedJenis,
                 onExpandedChange = { expandedJenis = it },
                 onItemSelected = { jenisMakanan = it; expandedJenis = false },
                 items = listJenis
             )
 
             DropDownField(
-                label = "Rasa Makanan", value = rasaMakanan, expanded = expandedRasa,
+                label = stringResource(R.string.rasa_makanan), value = rasaMakanan, expanded = expandedRasa,
                 onExpandedChange = { expandedRasa = it },
                 onItemSelected = { rasaMakanan = it; expandedRasa = false },
                 items = listRasa
             )
 
             DropDownField(
-                label = "Tingkat Kepedasan", value = tingkatPedas, expanded = expandedPedas,
+                label = stringResource(R.string.tingkat_kepedasan), value = tingkatPedas, expanded = expandedPedas,
                 onExpandedChange = { expandedPedas = it },
                 onItemSelected = { tingkatPedas = it; expandedPedas = false },
                 items = listPedas
             )
 
             DropDownField(
-                label = "Texture Makanan", value = teksturMakanan, expanded = expandedTekstur,
+                label = stringResource(R.string.tekstur_makanan), value = teksturMakanan, expanded = expandedTekstur,
                 onExpandedChange = { expandedTekstur = it },
                 onItemSelected = { teksturMakanan = it; expandedTekstur = false },
                 items = listTekstur
@@ -184,7 +185,7 @@ fun TambahMakananScreen(navController: NavController) {
                 colors = ButtonDefaults.buttonColors(containerColor = yellowColor),
                 shape = RoundedCornerShape(50)
             ) {
-                Text("Tambah Makanan", color = Color.White)
+                Text(stringResource(R.string.tambah_makanan), color = Color.White)
             }
         }
     }
