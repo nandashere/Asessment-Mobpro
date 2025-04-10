@@ -44,40 +44,54 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.anandamartiza0128.makanapaya.R
 import com.anandamartiza0128.makanapaya.components.DropDownField
-import com.anandamartiza0128.makanapaya.model.MakananForm
+import com.anandamartiza0128.makanapaya.model.Makanan
+import com.anandamartiza0128.makanapaya.viewmodel.FoodViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TambahMakananScreen(navController: NavController) {
+fun TambahMakananScreen(
+    navController: NavHostController,
+    viewModel: FoodViewModel = viewModel()
+) {
     val context = LocalContext.current
     val ceriseColor = Color(ContextCompat.getColor(context, R.color.cerise))
     val yellowColor = Color(ContextCompat.getColor(context, R.color.yellow))
 
-    // data form makanan
-    var formState by remember { mutableStateOf(MakananForm()) }
+    var formState by remember {
+        mutableStateOf(
+            Makanan(
+                nama = "",
+                jenis = "",
+                rasa = "",
+                tingkatPedas = "",
+                tekstur = "",
+                imageUri = null
+            )
+        )
+    }
 
-    // memilih gambar
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { uri -> formState = formState.copy(imageUri = uri) }
-    )
-
-    // tampilan dropdown
     var expandedJenis by remember { mutableStateOf(false) }
     var expandedRasa by remember { mutableStateOf(false) }
     var expandedPedas by remember { mutableStateOf(false) }
     var expandedTekstur by remember { mutableStateOf(false) }
 
-    // list item dropdown
-    val listJenis = listOf("Makanan Berat", "Makanan Ringan")
-    val listRasa = listOf("Gurih", "Manis")
-    val listPedas = listOf("Pedas", "Tidak Pedas")
+    val listJenis = listOf("Makanan Berat", "Cemilan")
+    val listRasa = listOf("Manis", "Asin", "Gurih", "Asam")
+    val listPedas = listOf("Tidak Pedas", "Sedikit Pedas", "Pedas", "Sangat Pedas")
     val listTekstur = listOf("Berkuah", "Kering")
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+        onResult = { uri ->
+            formState = formState.copy(imageUri = uri)
+        }
+    )
 
     Scaffold(
         topBar = {
@@ -202,7 +216,10 @@ fun TambahMakananScreen(navController: NavController) {
 
             Button(
                 onClick = {
-                    // TODO: Simpan formState ke database / state global
+                    if (formState.nama.isNotBlank()) {
+                        viewModel.addMakanan(formState)
+                        navController.popBackStack()
+                    }
                 },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = yellowColor),
@@ -213,6 +230,7 @@ fun TambahMakananScreen(navController: NavController) {
         }
     }
 }
+
 
 @Composable
 fun FormField(label: String, value: String, onValueChange: (String) -> Unit) {
