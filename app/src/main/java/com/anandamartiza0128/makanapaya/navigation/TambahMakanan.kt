@@ -1,6 +1,5 @@
 package com.anandamartiza0128.makanapaya.navigation
 
-import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -20,10 +19,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -52,6 +48,8 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.anandamartiza0128.makanapaya.R
+import com.anandamartiza0128.makanapaya.components.DropDownField
+import com.anandamartiza0128.makanapaya.model.MakananForm
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,25 +58,22 @@ fun TambahMakananScreen(navController: NavController) {
     val ceriseColor = Color(ContextCompat.getColor(context, R.color.cerise))
     val yellowColor = Color(ContextCompat.getColor(context, R.color.yellow))
 
-    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    // data form makanan
+    var formState by remember { mutableStateOf(MakananForm()) }
+
+    // memilih gambar
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { uri -> selectedImageUri = uri }
+        onResult = { uri -> formState = formState.copy(imageUri = uri) }
     )
 
-    var namaMakanan by remember { mutableStateOf("") }
-    var jenisMakanan by remember { mutableStateOf("") }
+    // tampilan dropdown
     var expandedJenis by remember { mutableStateOf(false) }
-
-    var rasaMakanan by remember { mutableStateOf("") }
     var expandedRasa by remember { mutableStateOf(false) }
-
-    var tingkatPedas by remember { mutableStateOf("") }
     var expandedPedas by remember { mutableStateOf(false) }
-
-    var teksturMakanan by remember { mutableStateOf("") }
     var expandedTekstur by remember { mutableStateOf(false) }
 
+    // list item dropdown
     val listJenis = listOf("Makanan Berat", "Makanan Ringan")
     val listRasa = listOf("Gurih", "Manis")
     val listPedas = listOf("Pedas", "Tidak Pedas")
@@ -94,9 +89,11 @@ fun TambahMakananScreen(navController: NavController) {
                 ),
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
-                            tint = Color.White)
+                            tint = Color.White
+                        )
                     }
                 }
             )
@@ -122,9 +119,9 @@ fun TambahMakananScreen(navController: NavController) {
                     .background(Color.LightGray),
                 contentAlignment = Alignment.Center
             ) {
-                if (selectedImageUri != null) {
+                if (formState.imageUri != null) {
                     Image(
-                        painter = rememberAsyncImagePainter(selectedImageUri),
+                        painter = rememberAsyncImagePainter(formState.imageUri),
                         contentDescription = null,
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
@@ -147,40 +144,66 @@ fun TambahMakananScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            FormField(label = stringResource(R.string.nama_makanan), value = namaMakanan, onValueChange = { namaMakanan = it })
+            FormField(
+                label = stringResource(R.string.nama_makanan),
+                value = formState.nama,
+                onValueChange = { formState = formState.copy(nama = it) }
+            )
 
             DropDownField(
-                label = stringResource(R.string.jenis_makanan), value = jenisMakanan, expanded = expandedJenis,
+                label = stringResource(R.string.jenis_makanan),
+                value = formState.jenis,
+                expanded = expandedJenis,
                 onExpandedChange = { expandedJenis = it },
-                onItemSelected = { jenisMakanan = it; expandedJenis = false },
+                onItemSelected = {
+                    formState = formState.copy(jenis = it)
+                    expandedJenis = false
+                },
                 items = listJenis
             )
 
             DropDownField(
-                label = stringResource(R.string.rasa_makanan), value = rasaMakanan, expanded = expandedRasa,
+                label = stringResource(R.string.rasa_makanan),
+                value = formState.rasa,
+                expanded = expandedRasa,
                 onExpandedChange = { expandedRasa = it },
-                onItemSelected = { rasaMakanan = it; expandedRasa = false },
+                onItemSelected = {
+                    formState = formState.copy(rasa = it)
+                    expandedRasa = false
+                },
                 items = listRasa
             )
 
             DropDownField(
-                label = stringResource(R.string.tingkat_kepedasan), value = tingkatPedas, expanded = expandedPedas,
+                label = stringResource(R.string.tingkat_kepedasan),
+                value = formState.tingkatPedas,
+                expanded = expandedPedas,
                 onExpandedChange = { expandedPedas = it },
-                onItemSelected = { tingkatPedas = it; expandedPedas = false },
+                onItemSelected = {
+                    formState = formState.copy(tingkatPedas = it)
+                    expandedPedas = false
+                },
                 items = listPedas
             )
 
             DropDownField(
-                label = stringResource(R.string.tekstur_makanan), value = teksturMakanan, expanded = expandedTekstur,
+                label = stringResource(R.string.tekstur_makanan),
+                value = formState.tekstur,
+                expanded = expandedTekstur,
                 onExpandedChange = { expandedTekstur = it },
-                onItemSelected = { teksturMakanan = it; expandedTekstur = false },
+                onItemSelected = {
+                    formState = formState.copy(tekstur = it)
+                    expandedTekstur = false
+                },
                 items = listTekstur
             )
 
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
-                onClick = { /* TODO: Tambahkan aksi simpan */ },
+                onClick = {
+                    // TODO: Simpan formState ke database / state global
+                },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = yellowColor),
                 shape = RoundedCornerShape(50)
@@ -193,7 +216,9 @@ fun TambahMakananScreen(navController: NavController) {
 
 @Composable
 fun FormField(label: String, value: String, onValueChange: (String) -> Unit) {
-    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+    Column(modifier = Modifier
+        .fillMaxWidth()
+        .padding(vertical = 4.dp)) {
         Text(label, style = MaterialTheme.typography.labelMedium)
         OutlinedTextField(
             value = value,
@@ -203,48 +228,6 @@ fun FormField(label: String, value: String, onValueChange: (String) -> Unit) {
         )
     }
 }
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun DropDownField(
-    label: String,
-    value: String,
-    expanded: Boolean,
-    onExpandedChange: (Boolean) -> Unit,
-    onItemSelected: (String) -> Unit,
-    items: List<String>
-) {
-    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
-        Text(label, style = MaterialTheme.typography.labelMedium)
-        ExposedDropdownMenuBox(
-            expanded = expanded,
-            onExpandedChange = onExpandedChange
-        ) {
-            OutlinedTextField(
-                value = value,
-                onValueChange = {},
-                readOnly = true,
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                modifier = Modifier
-                    .menuAnchor()
-                    .fillMaxWidth(),
-                shape = RoundedCornerShape(50)
-            )
-            ExposedDropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { onExpandedChange(false) }
-            ) {
-                items.forEach { item ->
-                    DropdownMenuItem(
-                        text = { Text(item) },
-                        onClick = { onItemSelected(item) }
-                    )
-                }
-            }
-        }
-    }
-}
-
 
 @Preview(showBackground = true)
 @Composable
