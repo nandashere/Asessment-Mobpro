@@ -82,7 +82,7 @@ fun TambahMakananScreen(
     var expandedTekstur by remember { mutableStateOf(false) }
 
     val listJenis = listOf("Makanan Berat", "Cemilan")
-    val listRasa = listOf("Manis", "Asin", "Gurih", "Asam")
+    val listRasa = listOf("Manis", "Gurih")
     val listPedas = listOf("Tidak Pedas", "Sedikit Pedas", "Pedas", "Sangat Pedas")
     val listTekstur = listOf("Berkuah", "Kering")
 
