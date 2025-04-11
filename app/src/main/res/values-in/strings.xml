@@ -9,7 +9,8 @@
     <string name="share_foodlist">Bagikan Foodlist</string>
     <string name="back">Kembali</string>
     <string name="rasa_gurih">Gurih</string>
-    <string name="rasa_pedas">Manis</string>
+    <string name="rasa_pedas">Pedas</string>
+    <string name="rasa_manis">Manis</string>
     <string name="tipe_berat">Makanan Berat</string>
     <string name="tekstur_kering">Kering</string>
     <string name="edit">Sunting</string>

@@ -16,9 +16,10 @@
 
     //Deskripsi Rasa dan Tipe
     <string name="rasa_gurih">Savory</string>
-    <string name="rasa_pedas">Sweet</string>
+    <string name="rasa_manis">Sweet</string>
     <string name="tipe_berat">Heavy Meal</string>
     <string name="tekstur_kering">Dry</string>
+    <string name="rasa_pedas">Spicy</string>
 
     //action
     <string name="edit">Edit</string>
@@ -67,7 +68,7 @@
 
     <string-array name="rasa_makanan">
         <item>@string/rasa_gurih</item>
-        <item>@string/rasa_pedas</item>
+        <item>@string/rasa_manis</item>
     </string-array>
 
     <string-array name="tingkat_pedas">
