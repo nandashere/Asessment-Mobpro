@@ -1,49 +1,79 @@
 <resources>
 
     //page name
-    <string name="app_name">Makan Apa Ya</string>
-    <string name="tambah_makanan">Tambah Makanan</string>
-    <string name="cari_makanan">Cari Makanan</string>
-    <string name="foodlist">Foodlist Saya</string>
+    <string name="app_name" translatable="false">Makan Apa Ya</string>
+    <string name="tambah_makanan">Add Food</string>
+    <string name="cari_makanan">Find Food</string>
+    <string name="foodlist">My Foodlist</string>
+    <string name="title_tambah_makanan">My Food</string>
 
     //buttons
-    <string name="tombol_tambah_makanan">Tambah Makanan</string>
-    <string name="tombol_cari_makanan">Cari Makanan</string>
-    <string name="tombol_foodlist">Lihat Foodlist</string>
-
-    //page desc
-    <string name="my_foodlist">Ayam Geprek, Gacoan, Ayam Penyet</string>
-
-    <!-- Deskripsi Rasa & Tipe -->
-    <string name="rasa_gurih">Gurih</string>
-    <string name="rasa_pedas">Pedas</string>
-    <string name="tipe_berat">Makanan Berat</string>
-    <string name="tekstur_kering">Kering</string>
-
-    <!-- Tindakan -->
-    <string name="edit">Edit</string>
-    <string name="delete">Hapus</string>
-
-    <!-- Makanan -->
-    <string name="makanan_ayam_geprek">Ayam Geprek</string>
-    <string name="makanan_gacoan">Gacoan</string>
-    <string name="makanan_ayam_penyet">Ayam Penyet</string>
-
-    <!-- Content Description (aksesibilitas) -->
-    <string name="icon_back">Kembali</string>
-    <string name="icon_edit">Edit item</string>
-    <string name="icon_delete">Hapus item</string>
-    <string name="image_content_desc">Foto makanan %1$s</string>
-    <string name="share_foodlist">Bagikan Foodlist</string>
-
-    <string name="title_tambah_makanan">Makanan Saya</string>
+    <string name="tombol_tambah_makanan">Add Food</string>
+    <string name="tombol_cari_makanan">Find Food</string>
+    <string name="tombol_foodlist">View Foodlist</string>
+    <string name="share_foodlist">Share Foodlist</string>
     <string name="back">Back</string>
-    <string name="masukkan_gambar">Masukkan Gambar</string>
-    <string name="tambahkan_gambar">Tambahkan Gambar</string>
-    <string name="nama_makanan">Nama makanan</string>
-    <string name="jenis_makanan">Jenis Makanan</string>
-    <string name="rasa_makanan">Rasa Makanan</string>
-    <string name="tingkat_kepedasan">Tingkat Kepedasan</string>
-    <string name="tekstur_makanan">Tekstur Makanan</string>
+
+    //Deskripsi Rasa dan Tipe
+    <string name="rasa_gurih">Savory</string>
+    <string name="rasa_pedas">Spicy</string>
+    <string name="tipe_berat">Heavy Meal</string>
+    <string name="tekstur_kering">Dry</string>
+
+    //action
+    <string name="edit">Edit</string>
+    <string name="delete">Delet</string>
+
+   //Makanan
+    <string name="makanan_ayam_geprek" translatable="false">Ayam Geprek</string>
+
+    //icon
+    <string name="icon_back">Back</string>
+    <string name="icon_edit">Edit item</string>
+    <string name="icon_delete">Delete Item</string>
+
+    <string name="image_content_desc">Image of %1$s</string>
+
+    <string name="masukkan_gambar">Insert Image</string>
+    <string name="tambahkan_gambar">Add Image</string>
+    <string name="nama_makanan">Food Name</string>
+    <string name="jenis_makanan">Food Type</string>
+    <string name="rasa_makanan">Taste</string>
+    <string name="tingkat_kepedasan">Spiciness Level</string>
+    <string name="tekstur_makanan">Texture</string>
+
+    <string name="no_food_added">No food added yet.</string>
+    <string name="share_foodlist_via">Share foodlist via:</string>
+    <string name="foodlist_title" translatable="false">Foodlist:</string>
+    <string name="foodlist_empty_share_text">No food in the food list yet.</string>
+
+    <string name="sesuaikan_seleramu">Adjust Your Preference!</string>
+    <string name="rasa">Taste</string>
+    <string name="tingkat_pedas">Spiciness</string>
+    <string name="rekomendasi">Recommendations:</string>
+    <string name="tidak_ada_makanan">No matching food found 😢</string>
+    <string name="btn_cari_makanan">Find Food</string>
+
+    <string-array name="list_jenis">
+        <item>Makanan Berat</item>
+        <item>Cemilan</item>
+    </string-array>
+
+    <string-array name="list_rasa">
+        <item>Manis</item>
+        <item>Gurih</item>
+    </string-array>
+
+    <string-array name="list_pedas">
+        <item>Tidak Pedas</item>
+        <item>Sedikit Pedas</item>
+        <item>Pedas</item>
+        <item>Sangat Pedas</item>
+    </string-array>
+
+    <string-array name="list_tekstur">
+        <item>Berkuah</item>
+        <item>Kering</item>
+    </string-array>
 
 </resources>

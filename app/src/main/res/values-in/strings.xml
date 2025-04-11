@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Makan Apa Ya</string>
+    <string name="tambah_makanan">Tambah Makanan</string>
+    <string name="cari_makanan">Cari Makanan</string>
+    <string name="title_tambah_makanan">Makanan Saya</string>
+    <string name="tombol_tambah_makanan">Tambah Makanan</string>
+    <string name="tombol_cari_makanan">Cari Makanan</string>
+    <string name="tombol_foodlist">Lihat Foodlist</string>
+    <string name="share_foodlist">Bagikan Foodlist</string>
+    <string name="back">Kembali</string>
+    <string name="rasa_gurih">Gurih</string>
+    <string name="rasa_pedas">Pedas</string>
+    <string name="tipe_berat">Makanan Berat</string>
+    <string name="tekstur_kering">Kering</string>
+    <string name="edit">Sunting</string>
+    <string name="delete">Hapus</string>
+    <string name="icon_back">Kembali</string>
+    <string name="icon_edit">Sunting Item</string>
+    <string name="icon_delete">Hapus Item</string>
+    <string name="image_content_desc">Foto Makanan %1$s</string>
+    <string name="masukkan_gambar">Masukkan Gambar</string>
+    <string name="tambahkan_gambar">Tambahkan Gambar</string>
+    <string name="nama_makanan">Nama makanan</string>
+    <string name="jenis_makanan">Jenis Makanan</string>
+    <string name="rasa_makanan">Rasa Makanan</string>
+    <string name="tingkat_kepedasan">Tingkat Kepedasan</string>
+    <string name="tekstur_makanan">Tekstur Makanan</string>
+    <string name="no_food_added">Belum ada makanan ditambahkan.</string>
+    <string name="share_foodlist_via">Bagikan daftar makanan via:</string>
+    <string name="foodlist_empty_share_text">Belum ada makanan di foodlist.</string>
+    <string name="sesuaikan_seleramu">Sesuaikan Seleramu!</string>
+    <string name="rasa">Rasa</string>
+    <string name="tingkat_pedas">Pedas atau Tidak</string>
+    <string name="rekomendasi">Rekomendasi:</string>
+    <string name="tidak_ada_makanan">Ga ada makanan yang cocok nih 😢</string>
+    <string name="btn_cari_makanan">Cari Makanan</string>
+    <string name="foodlist">Foodlist Saya</string>
+</resources>
