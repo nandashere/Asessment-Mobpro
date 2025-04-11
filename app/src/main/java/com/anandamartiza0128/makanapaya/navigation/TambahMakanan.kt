@@ -50,9 +50,6 @@ import com.anandamartiza0128.makanapaya.components.DropDownField
 import com.anandamartiza0128.makanapaya.model.Makanan
 import com.anandamartiza0128.makanapaya.viewmodel.FoodViewModel
 import com.anandamartiza0128.makanapaya.model.FoodConstants
-import com.anandamartiza0128.makanapaya.model.FoodConstants.listPedas
-import com.anandamartiza0128.makanapaya.model.FoodConstants.listRasa
-import com.anandamartiza0128.makanapaya.model.FoodConstants.listTekstur
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -82,7 +79,11 @@ fun TambahMakananScreen(
     var expandedPedas by remember { mutableStateOf(false) }
     var expandedTekstur by remember { mutableStateOf(false) }
 
-    val listJenis = FoodConstants.listJenis
+    val listJenis = FoodConstants.getListJenis(context)
+    val listRasa = FoodConstants.getListRasa(context)
+    val listPedas = FoodConstants.getListPedas(context)
+    val listTekstur = FoodConstants.getListTekstur(context)
+
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),

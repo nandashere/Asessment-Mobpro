@@ -45,11 +45,12 @@ fun CariMakananScreen(
     val context = LocalContext.current
     val ceriseColor = Color(ContextCompat.getColor(context, R.color.cerise))
 
+
     // Ambil list dari FoodConstants
-    val listJenis = FoodConstants.listJenis
-    val listRasa = FoodConstants.listRasa
-    val listPedas = FoodConstants.listPedas
-    val listTekstur = FoodConstants.listTekstur
+    val listJenis = FoodConstants.getListJenis(context)
+    val listRasa = FoodConstants.getListRasa(context)
+    val listPedas = FoodConstants.getListPedas(context)
+    val listTekstur = FoodConstants.getListTekstur(context)
 
     // State pencarian
     var jenis by remember { mutableStateOf("") }

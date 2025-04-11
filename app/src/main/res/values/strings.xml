@@ -16,13 +16,13 @@
 
     //Deskripsi Rasa dan Tipe
     <string name="rasa_gurih">Savory</string>
-    <string name="rasa_pedas">Spicy</string>
+    <string name="rasa_pedas">Sweet</string>
     <string name="tipe_berat">Heavy Meal</string>
     <string name="tekstur_kering">Dry</string>
 
     //action
     <string name="edit">Edit</string>
-    <string name="delete">Delet</string>
+    <string name="delete">Delete</string>
 
    //Makanan
     <string name="makanan_ayam_geprek" translatable="false">Ayam Geprek</string>
@@ -54,26 +54,33 @@
     <string name="tidak_ada_makanan">No matching food found 😢</string>
     <string name="btn_cari_makanan">Find Food</string>
 
-    <string-array name="list_jenis">
-        <item>Makanan Berat</item>
-        <item>Cemilan</item>
+    <string name="jenis_cemilan">Snack</string>
+    <string name="tekstur_berkuah">Soupy</string>
+    <string name="tidak_pedas">Not Spicy</string>
+    <string name="sedikit_pedas">Mildly Spicy</string>
+    <string name="sangat_pedas">Very Spicy</string>
+
+    <string-array name="jenis_makanan">
+        <item>@string/tipe_berat</item>
+        <item>@string/jenis_cemilan</item>
     </string-array>
 
-    <string-array name="list_rasa">
-        <item>Manis</item>
-        <item>Gurih</item>
+    <string-array name="rasa_makanan">
+        <item>@string/rasa_gurih</item>
+        <item>@string/rasa_pedas</item>
     </string-array>
 
-    <string-array name="list_pedas">
-        <item>Tidak Pedas</item>
-        <item>Sedikit Pedas</item>
-        <item>Pedas</item>
-        <item>Sangat Pedas</item>
+    <string-array name="tingkat_pedas">
+        <item>@string/tidak_pedas</item>
+        <item>@string/sedikit_pedas</item>
+        <item>@string/rasa_pedas</item>
+        <item>@string/sangat_pedas</item>
     </string-array>
 
-    <string-array name="list_tekstur">
-        <item>Berkuah</item>
-        <item>Kering</item>
+    <string-array name="tekstur_makanan">
+        <item>@string/tekstur_kering</item>
+        <item>@string/tekstur_berkuah</item>
     </string-array>
+
 
 </resources>

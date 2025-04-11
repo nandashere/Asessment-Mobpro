@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Makan Apa Ya</string>
     <string name="tambah_makanan">Tambah Makanan</string>
     <string name="cari_makanan">Cari Makanan</string>
     <string name="title_tambah_makanan">Makanan Saya</string>
@@ -10,7 +9,7 @@
     <string name="share_foodlist">Bagikan Foodlist</string>
     <string name="back">Kembali</string>
     <string name="rasa_gurih">Gurih</string>
-    <string name="rasa_pedas">Pedas</string>
+    <string name="rasa_pedas">Manis</string>
     <string name="tipe_berat">Makanan Berat</string>
     <string name="tekstur_kering">Kering</string>
     <string name="edit">Sunting</string>
@@ -22,6 +21,7 @@
     <string name="masukkan_gambar">Masukkan Gambar</string>
     <string name="tambahkan_gambar">Tambahkan Gambar</string>
     <string name="nama_makanan">Nama makanan</string>
+    <string name="sangat_pedas">Sangat Pedas</string>
     <string name="jenis_makanan">Jenis Makanan</string>
     <string name="rasa_makanan">Rasa Makanan</string>
     <string name="tingkat_kepedasan">Tingkat Kepedasan</string>
@@ -36,4 +36,8 @@
     <string name="tidak_ada_makanan">Ga ada makanan yang cocok nih 😢</string>
     <string name="btn_cari_makanan">Cari Makanan</string>
     <string name="foodlist">Foodlist Saya</string>
+    <string name="jenis_cemilan">Cemilan</string>
+    <string name="tekstur_berkuah">Berkuah</string>
+    <string name="tidak_pedas">Tidak Pedas</string>
+    <string name="sedikit_pedas">Sedikit Pedas</string>
 </resources>

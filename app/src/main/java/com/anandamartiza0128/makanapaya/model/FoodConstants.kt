@@ -1,8 +1,22 @@
 package com.anandamartiza0128.makanapaya.model
 
+import android.content.Context
+import com.anandamartiza0128.makanapaya.R
+
 object FoodConstants {
-    val listJenis = listOf("Makanan Berat", "Cemilan")
-    val listRasa = listOf("Manis", "Gurih")
-    val listPedas = listOf("Tidak Pedas", "Sedikit Pedas", "Pedas", "Sangat Pedas")
-    val listTekstur = listOf("Berkuah", "Kering")
+    fun getListJenis(context: Context): List<String> {
+        return context.resources.getStringArray(R.array.jenis_makanan).toList()
+    }
+
+    fun getListRasa(context: Context): List<String> {
+        return context.resources.getStringArray(R.array.rasa_makanan).toList()
+    }
+
+    fun getListPedas(context: Context): List<String> {
+        return context.resources.getStringArray(R.array.tingkat_pedas).toList()
+    }
+
+    fun getListTekstur(context: Context): List<String> {
+        return context.resources.getStringArray(R.array.tekstur_makanan).toList()
+    }
 }
