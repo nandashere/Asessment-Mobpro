@@ -10,18 +10,6 @@ class FoodViewModel : ViewModel() {
     private val _foodList = mutableStateListOf<Makanan>()
     val foodList: List<Makanan> = _foodList
 
-    init {
-        val dummyMakanan = Makanan(
-            nama = "Ayam Geprek",
-            jenis = "Makanan Berat",
-            rasa = "Gurih",
-            tingkatPedas = "Pedas",
-            tekstur = "Kering",
-            imageUri = Uri.parse("android.resource://com.anandamartiza0128.makanapaya/drawable/ayam_geprek")
-        )
-        _foodList.add(dummyMakanan)
-    }
-
     fun addMakanan(makanan: Makanan) {
         _foodList.add(makanan)
     }
