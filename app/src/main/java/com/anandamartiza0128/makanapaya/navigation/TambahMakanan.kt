@@ -52,12 +52,16 @@ import com.anandamartiza0128.makanapaya.components.DropDownField
 import com.anandamartiza0128.makanapaya.model.Makanan
 import com.anandamartiza0128.makanapaya.viewmodel.FoodViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.anandamartiza0128.makanapaya.model.FoodConstants
+import com.anandamartiza0128.makanapaya.model.FoodConstants.listPedas
+import com.anandamartiza0128.makanapaya.model.FoodConstants.listRasa
+import com.anandamartiza0128.makanapaya.model.FoodConstants.listTekstur
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TambahMakananScreen(
     navController: NavHostController,
-    viewModel: FoodViewModel = viewModel()
+    viewModel: FoodViewModel
 ) {
     val context = LocalContext.current
     val ceriseColor = Color(ContextCompat.getColor(context, R.color.cerise))
@@ -81,10 +85,7 @@ fun TambahMakananScreen(
     var expandedPedas by remember { mutableStateOf(false) }
     var expandedTekstur by remember { mutableStateOf(false) }
 
-    val listJenis = listOf("Makanan Berat", "Cemilan")
-    val listRasa = listOf("Manis", "Gurih")
-    val listPedas = listOf("Tidak Pedas", "Sedikit Pedas", "Pedas", "Sangat Pedas")
-    val listTekstur = listOf("Berkuah", "Kering")
+    val listJenis = FoodConstants.listJenis
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
@@ -247,10 +248,10 @@ fun FormField(label: String, value: String, onValueChange: (String) -> Unit) {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun TambahMakananScreenPreview() {
-    val navController = rememberNavController()
-
-    TambahMakananScreen(navController = navController)
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun TambahMakananScreenPreview() {
+//    val navController = rememberNavController()
+//
+//    TambahMakananScreen(navController = navController)
+//}

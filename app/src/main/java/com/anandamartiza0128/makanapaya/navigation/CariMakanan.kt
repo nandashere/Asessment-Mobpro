@@ -1,25 +1,63 @@
 package com.anandamartiza0128.makanapaya.navigation
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.anandamartiza0128.makanapaya.R
+import com.anandamartiza0128.makanapaya.model.Makanan
+import com.anandamartiza0128.makanapaya.viewmodel.FoodViewModel
+import androidx.compose.ui.Alignment
+import com.anandamartiza0128.makanapaya.model.FoodConstants
 
-@OptIn(ExperimentalMaterial3Api::class)
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun CariMakananScreen() {
-    val context = LocalContext.current                                           // akses resources dari Android framework(color.xml, string.xml,dll.)
-    val ceriseColor = Color(ContextCompat.getColor(context, R.color.cerise))    // pakai warna dari file colors.xml
+fun CariMakananScreen(
+    viewModel: FoodViewModel
+) {
+    val context = LocalContext.current
+    val ceriseColor = Color(ContextCompat.getColor(context, R.color.cerise))
+
+    // Ambil list dari FoodConstants
+    val listJenis = FoodConstants.listJenis
+    val listRasa = FoodConstants.listRasa
+    val listPedas = FoodConstants.listPedas
+    val listTekstur = FoodConstants.listTekstur
+
+    // State pencarian
+    var jenis by remember { mutableStateOf("") }
+    var rasa by remember { mutableStateOf("") }
+    var tingkatPedas by remember { mutableStateOf("") }
+    var tekstur by remember { mutableStateOf("") }
+    var hasil by remember { mutableStateOf<List<Makanan>>(emptyList()) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -28,14 +66,122 @@ fun CariMakananScreen() {
                 },
                 colors = TopAppBarDefaults.mediumTopAppBarColors(
                     containerColor = ceriseColor,
-                    titleContentColor = Color.White,
+                    titleContentColor = Color.White
                 )
             )
         }
     ) { innerPadding ->
-        Text(
-            text = stringResource(R.string.my_foodlist),
-            modifier = Modifier.padding(innerPadding).padding(16.dp)
-        )
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .padding(24.dp)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text("Sesuaikan Seleramu!", color = Color.Red, fontWeight = FontWeight.Bold)
+
+            // === Jenis Makanan ===
+            Text("Jenis Makanan", fontWeight = FontWeight.SemiBold)
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                listJenis.forEach { item ->
+                    OutlinedButton(
+                        onClick = {
+                            jenis = if (jenis == item) "" else item
+                        },
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            containerColor = if (jenis == item) Color(0xFFFFCDD2) else Color.Transparent
+                        )
+                    ) {
+                        Text(item)
+                    }
+                }
+            }
+
+            // === Rasa ===
+            Text("Rasa", fontWeight = FontWeight.SemiBold)
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                listRasa.forEach { item ->
+                    OutlinedButton(
+                        onClick = { rasa = if (rasa == item) "" else item },
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            containerColor = if (rasa == item) Color(0xFFFFF9C4) else Color.Transparent
+                        )
+                    ) {
+                        Text(item)
+                    }
+                }
+            }
+
+            // === Tingkat Pedas ===
+            Text("Pedas atau Tidak", fontWeight = FontWeight.SemiBold)
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                listPedas.forEach { item ->
+                    OutlinedButton(
+                        onClick = { tingkatPedas = if (tingkatPedas == item) "" else item },
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            containerColor = if (tingkatPedas == item) Color(0xFFD1C4E9) else Color.Transparent
+                        )
+                    ) {
+                        Text(item)
+                    }
+                }
+            }
+
+            // === Tekstur ===
+            Text("Tekstur Makanan", fontWeight = FontWeight.SemiBold)
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                listTekstur.forEach { item ->
+                    OutlinedButton(
+                        onClick = { tekstur = if (tekstur == item) "" else item },
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            containerColor = if (tekstur == item) Color(0xFFB2DFDB) else Color.Transparent
+                        )
+                    ) {
+                        Text(item)
+                    }
+                }
+            }
+
+
+
+            // State untuk mendeteksi apakah tombol sudah ditekan
+            var sudahCari by remember { mutableStateOf(false) }
+
+            // === Hasil Pencarian ===
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (sudahCari) {
+                if (hasil.isNotEmpty()) {
+                    Text("Rekomendasi:", fontWeight = FontWeight.Bold)
+                    hasil.forEach { makanan ->
+                        FoodlistItem(
+                            imageUri = makanan.imageUri,
+                            name = makanan.nama,
+                            keywords = "${makanan.jenis}, ${makanan.rasa}, ${makanan.tingkatPedas}, ${makanan.tekstur}",
+                            modifier = Modifier.padding(vertical = 4.dp)
+                        )
+                    }
+                } else {
+                    Text("Ga ada makanan yang cocok nih 😢", color = Color.Gray)
+                }
+            }
+
+            // === Tombol Cari Makanan (Selalu Ditampilkan) ===
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = {
+                    hasil = viewModel.cariRekomendasi(jenis, rasa, tingkatPedas, tekstur)
+                    sudahCari = true
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFD54F)),
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            ) {
+                Text("Cari Makanan")
+            }
+
+        }
     }
 }
+
+

@@ -51,7 +51,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 fun FoodlistScreen(
     modifier: Modifier = Modifier,
     navController: NavHostController,
-    viewModel: FoodViewModel = viewModel()
+    viewModel: FoodViewModel
 ) {
     val foodList = viewModel.foodList
     val context = LocalContext.current
@@ -94,9 +94,17 @@ fun FoodlistScreen(
                 )
             } else {
                 foodList.forEach { item ->
+                    val keywordGabungan = listOfNotNull(
+                        item.jenis,
+                        item.rasa,
+                        item.tingkatPedas,
+                        item.tekstur
+                    ).joinToString(", ")
+
                     FoodlistItem(
                         imageUri = item.imageUri,
-                        name = item.nama
+                        name = item.nama,
+                        keywords = keywordGabungan
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                 }
@@ -106,10 +114,13 @@ fun FoodlistScreen(
 
             Button(
                 onClick = {
-                    // Contoh dummy: nambahin makanan baru
                     val makananBaru = Makanan(
                         nama = "Makanan Baru",
-                        imageUri = null // atau Uri.parse("...") kalau dari galeri
+                        imageUri = null,
+                        jenis = "Cemilan",
+                        rasa = "Manis",
+                        tingkatPedas = "Tidak Pedas",
+                        tekstur = "Kering"
                     )
                     viewModel.addMakanan(makananBaru)
                 },
@@ -132,6 +143,7 @@ fun FoodlistScreen(
 fun FoodlistItem(
     imageUri: Uri?,
     name: String,
+    keywords: String, // Tambahan keyword gabungan
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -163,23 +175,31 @@ fun FoodlistItem(
             }
 
             Spacer(modifier = Modifier.width(16.dp))
-            Text(
-                text = name,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface
-            )
+            Column {
+                Text(
+                    text = name,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = keywords,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }
 
 
 
-@Preview(showBackground = true)
-@Composable
-fun FoodlistScreenPreview() {
-    val navController = rememberNavController()
-
-    FoodlistScreen(navController = navController)
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun FoodlistScreenPreview() {
+//    val navController = rememberNavController()
+//
+//    FoodlistScreen(navController = navController)
+//}
 
 

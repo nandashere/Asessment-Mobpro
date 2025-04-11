@@ -29,7 +29,7 @@ fun SetupNavGraph(navController: NavHostController = rememberNavController()) {
             TambahMakananScreen(navController = navController, viewModel = foodViewModel)
         }
         composable(route = Screen.CariMakanan.route) {
-            CariMakananScreen()
+            CariMakananScreen(viewModel = foodViewModel)
         }
     }
 }
