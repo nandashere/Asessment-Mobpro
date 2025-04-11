@@ -45,19 +45,17 @@ fun CariMakananScreen(
     val context = LocalContext.current
     val ceriseColor = Color(ContextCompat.getColor(context, R.color.cerise))
 
-
-    // Ambil list dari FoodConstants
     val listJenis = FoodConstants.getListJenis(context)
     val listRasa = FoodConstants.getListRasa(context)
     val listPedas = FoodConstants.getListPedas(context)
     val listTekstur = FoodConstants.getListTekstur(context)
 
-    // State pencarian
     var jenis by remember { mutableStateOf("") }
     var rasa by remember { mutableStateOf("") }
     var tingkatPedas by remember { mutableStateOf("") }
     var tekstur by remember { mutableStateOf("") }
     var hasil by remember { mutableStateOf<List<Makanan>>(emptyList()) }
+    var sudahCari by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -80,16 +78,14 @@ fun CariMakananScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text("Sesuaikan Seleramu!", color = Color.Red, fontWeight = FontWeight.Bold)
+            Text(stringResource(id = R.string.sesuaikan_seleramu), color = Color.Red, fontWeight = FontWeight.Bold)
 
             // === Jenis Makanan ===
-            Text("Jenis Makanan", fontWeight = FontWeight.SemiBold)
+            Text(stringResource(id = R.string.jenis_makanan), fontWeight = FontWeight.SemiBold)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 listJenis.forEach { item ->
                     OutlinedButton(
-                        onClick = {
-                            jenis = if (jenis == item) "" else item
-                        },
+                        onClick = { jenis = if (jenis == item) "" else item },
                         colors = ButtonDefaults.outlinedButtonColors(
                             containerColor = if (jenis == item) Color(0xFFFFCDD2) else Color.Transparent
                         )
@@ -100,7 +96,7 @@ fun CariMakananScreen(
             }
 
             // === Rasa ===
-            Text("Rasa", fontWeight = FontWeight.SemiBold)
+            Text(stringResource(id = R.string.rasa), fontWeight = FontWeight.SemiBold)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 listRasa.forEach { item ->
                     OutlinedButton(
@@ -115,7 +111,7 @@ fun CariMakananScreen(
             }
 
             // === Tingkat Pedas ===
-            Text("Pedas atau Tidak", fontWeight = FontWeight.SemiBold)
+            Text(stringResource(id = R.string.tingkat_pedas), fontWeight = FontWeight.SemiBold)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 listPedas.forEach { item ->
                     OutlinedButton(
@@ -130,7 +126,7 @@ fun CariMakananScreen(
             }
 
             // === Tekstur ===
-            Text("Tekstur Makanan", fontWeight = FontWeight.SemiBold)
+            Text(stringResource(id = R.string.tekstur_makanan), fontWeight = FontWeight.SemiBold)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 listTekstur.forEach { item ->
                     OutlinedButton(
@@ -144,17 +140,12 @@ fun CariMakananScreen(
                 }
             }
 
-
-
-            // State untuk mendeteksi apakah tombol sudah ditekan
-            var sudahCari by remember { mutableStateOf(false) }
-
             // === Hasil Pencarian ===
             Spacer(modifier = Modifier.height(16.dp))
 
             if (sudahCari) {
                 if (hasil.isNotEmpty()) {
-                    Text("Rekomendasi:", fontWeight = FontWeight.Bold)
+                    Text(stringResource(id = R.string.rekomendasi), fontWeight = FontWeight.Bold)
                     hasil.forEach { makanan ->
                         FoodlistItem(
                             imageUri = makanan.imageUri,
@@ -164,11 +155,10 @@ fun CariMakananScreen(
                         )
                     }
                 } else {
-                    Text("Ga ada makanan yang cocok nih 😢", color = Color.Gray)
+                    Text(stringResource(id = R.string.tidak_ada_makanan), color = Color.Gray)
                 }
             }
 
-            // === Tombol Cari Makanan (Selalu Ditampilkan) ===
             Spacer(modifier = Modifier.height(16.dp))
             Button(
                 onClick = {
@@ -178,11 +168,11 @@ fun CariMakananScreen(
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFD54F)),
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             ) {
-                Text("Cari Makanan")
+                Text(stringResource(id = R.string.btn_cari_makanan))
             }
-
         }
     }
 }
+
 
 

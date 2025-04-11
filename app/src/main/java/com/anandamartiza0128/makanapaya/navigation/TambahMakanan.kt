@@ -95,7 +95,7 @@ fun TambahMakananScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Makanan Saya") },
+                title = { Text(stringResource(R.string.foodlist)) },
                 colors = TopAppBarDefaults.mediumTopAppBarColors(
                     containerColor = ceriseColor,
                     titleContentColor = Color.White
@@ -104,7 +104,7 @@ fun TambahMakananScreen(
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.icon_back),
                             tint = Color.White
                         )
                     }

@@ -5,15 +5,12 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import com.anandamartiza0128.makanapaya.model.Makanan
 
-// di package viewmodel
 class FoodViewModel : ViewModel() {
 
-    // Ini list makanan yang akan diamati oleh Compose
     private val _foodList = mutableStateListOf<Makanan>()
     val foodList: List<Makanan> = _foodList
 
     init {
-        // Tambahkan dummy saat ViewModel pertama kali dibuat
         val dummyMakanan = Makanan(
             nama = "Ayam Geprek",
             jenis = "Makanan Berat",
