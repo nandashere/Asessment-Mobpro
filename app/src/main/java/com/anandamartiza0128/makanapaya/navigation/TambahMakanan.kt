@@ -167,7 +167,7 @@ fun TambahMakananScreen(
                     if (showError && it.isNotBlank()) showError = false
                 },
                 isError = showError && formState.nama.isBlank(),
-                errorMessage = "Kolom ini harus diisi"
+                errorMessage = stringResource(R.string.kolom_kosong)
             )
 
             DropDownField(

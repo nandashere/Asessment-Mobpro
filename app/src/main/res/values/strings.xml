@@ -61,6 +61,8 @@
     <string name="sedikit_pedas">Mildly Spicy</string>
     <string name="sangat_pedas">Very Spicy</string>
 
+    <string name="kolom_kosong">This field is required!</string>
+
     <string-array name="jenis_makanan">
         <item>@string/tipe_berat</item>
         <item>@string/jenis_cemilan</item>

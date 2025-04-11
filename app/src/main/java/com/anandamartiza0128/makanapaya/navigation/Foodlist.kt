@@ -53,6 +53,9 @@ fun FoodlistScreen(
     val context = LocalContext.current
     val cerise = Color(ContextCompat.getColor(context, R.color.cerise))
     val yellow = Color(ContextCompat.getColor(context, R.color.yellow))
+    val subjectText = stringResource(R.string.foodlist_title)
+    val subjectTextx = stringResource(R.string.share_foodlist_via)
+
 
     Scaffold(
         topBar = {
@@ -84,7 +87,7 @@ fun FoodlistScreen(
         ) {
             if (foodList.isEmpty()) {
                 Text(
-                    text = "Belum ada makanan ditambahkan.",
+                    text = stringResource(R.string.no_food_added),
                     modifier = Modifier.align(Alignment.CenterHorizontally),
                     color = Color.Gray
                 )
@@ -122,12 +125,12 @@ fun FoodlistScreen(
 
                         val shareIntent = Intent(Intent.ACTION_SEND).apply {
                             type = "text/plain"
-                            putExtra(Intent.EXTRA_SUBJECT, "Daftar Makanan Favoritku")
+                            putExtra(Intent.EXTRA_SUBJECT, subjectText)
                             putExtra(Intent.EXTRA_TEXT, shareText)
                         }
 
                         context.startActivity(
-                            Intent.createChooser(shareIntent, "Bagikan Food List via")
+                            Intent.createChooser(shareIntent, subjectTextx)
                         )
                     },
                     colors = ButtonDefaults.buttonColors(
@@ -139,7 +142,7 @@ fun FoodlistScreen(
                         .align(Alignment.CenterHorizontally)
                         .fillMaxWidth()
                 ) {
-                    Text(text = "Bagikan Food List")
+                    Text(text = stringResource(R.string.share_foodlist))
                 }
             }
         }

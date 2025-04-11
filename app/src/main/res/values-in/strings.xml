@@ -23,6 +23,7 @@
     <string name="tambahkan_gambar">Tambahkan Gambar</string>
     <string name="nama_makanan">Nama makanan</string>
     <string name="sangat_pedas">Sangat Pedas</string>
+    <string name="kolom_kosong">Kolom ini harus diisi!</string>
     <string name="jenis_makanan">Jenis Makanan</string>
     <string name="rasa_makanan">Rasa Makanan</string>
     <string name="tingkat_kepedasan">Tingkat Kepedasan</string>

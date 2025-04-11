@@ -1,6 +1,5 @@
 package com.anandamartiza0128.makanapaya.viewmodel
 
-import android.net.Uri
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import com.anandamartiza0128.makanapaya.model.Makanan
