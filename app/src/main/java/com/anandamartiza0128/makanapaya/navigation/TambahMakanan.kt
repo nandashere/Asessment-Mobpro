@@ -84,6 +84,7 @@ fun TambahMakananScreen(
     val listPedas = FoodConstants.getListPedas(context)
     val listTekstur = FoodConstants.getListTekstur(context)
 
+    var showError by remember { mutableStateOf(false) }
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
@@ -157,10 +158,16 @@ fun TambahMakananScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Form Field Nama Makanan dengan Validasi
             FormField(
                 label = stringResource(R.string.nama_makanan),
                 value = formState.nama,
-                onValueChange = { formState = formState.copy(nama = it) }
+                onValueChange = {
+                    formState = formState.copy(nama = it)
+                    if (showError && it.isNotBlank()) showError = false
+                },
+                isError = showError && formState.nama.isBlank(),
+                errorMessage = "Kolom ini harus diisi"
             )
 
             DropDownField(
@@ -215,7 +222,9 @@ fun TambahMakananScreen(
 
             Button(
                 onClick = {
-                    if (formState.nama.isNotBlank()) {
+                    if (formState.nama.isBlank()) {
+                        showError = true
+                    } else {
                         viewModel.addMakanan(formState)
                         navController.popBackStack()
                     }
@@ -232,19 +241,32 @@ fun TambahMakananScreen(
 
 
 @Composable
-fun FormField(label: String, value: String, onValueChange: (String) -> Unit) {
-    Column(modifier = Modifier
-        .fillMaxWidth()
-        .padding(vertical = 4.dp)) {
-        Text(label, style = MaterialTheme.typography.labelMedium)
+fun FormField(
+    label: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    isError: Boolean = false,
+    errorMessage: String = ""
+) {
+    Column {
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(50)
+            label = { Text(label) },
+            isError = isError,
+            modifier = Modifier.fillMaxWidth()
         )
+        if (isError) {
+            Text(
+                text = errorMessage,
+                color = Color.Red,
+                style = MaterialTheme.typography.labelSmall,
+                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+            )
+        }
     }
 }
+
 
 //@Preview(showBackground = true)
 //@Composable
