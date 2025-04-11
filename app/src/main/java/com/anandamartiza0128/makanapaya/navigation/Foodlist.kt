@@ -1,5 +1,6 @@
 package com.anandamartiza0128.makanapaya.navigation
 
+import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -38,9 +39,7 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.anandamartiza0128.makanapaya.R
-import com.anandamartiza0128.makanapaya.model.Makanan
 import com.anandamartiza0128.makanapaya.viewmodel.FoodViewModel
-
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -105,42 +104,54 @@ fun FoodlistScreen(
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                 }
-            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
-            Button(
-                onClick = {
-                    val makananBaru = Makanan(
-                        nama = "Makanan Baru",
-                        imageUri = null,
-                        jenis = "Cemilan",
-                        rasa = "Manis",
-                        tingkatPedas = "Tidak Pedas",
-                        tekstur = "Kering"
-                    )
-                    viewModel.addMakanan(makananBaru)
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = yellow,
-                    contentColor = Color.White
-                ),
-                shape = RoundedCornerShape(50),
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .width(200.dp)
-            ) {
-                Text(text = "Tambah Makanan")
+                // Tombol Share
+                Button(
+                    onClick = {
+                        val shareText = foodList.joinToString("\n\n") { item ->
+                            buildString {
+                                append("🍽️ ${item.nama}\n")
+                                append("• Jenis: ${item.jenis}\n")
+                                append("• Rasa: ${item.rasa}\n")
+                                append("• Tingkat Pedas: ${item.tingkatPedas}\n")
+                                append("• Tekstur: ${item.tekstur}")
+                            }
+                        }
+
+                        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(Intent.EXTRA_SUBJECT, "Daftar Makanan Favoritku")
+                            putExtra(Intent.EXTRA_TEXT, shareText)
+                        }
+
+                        context.startActivity(
+                            Intent.createChooser(shareIntent, "Bagikan Food List via")
+                        )
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = yellow,
+                        contentColor = Color.White
+                    ),
+                    shape = RoundedCornerShape(50),
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .fillMaxWidth()
+                ) {
+                    Text(text = "Bagikan Food List")
+                }
             }
         }
     }
 }
 
+
 @Composable
 fun FoodlistItem(
     imageUri: Uri?,
     name: String,
-    keywords: String, // Tambahan keyword gabungan
+    keywords: String,
     modifier: Modifier = Modifier
 ) {
     Card(

@@ -10,9 +10,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -34,12 +38,14 @@ import com.anandamartiza0128.makanapaya.R
 import com.anandamartiza0128.makanapaya.model.Makanan
 import com.anandamartiza0128.makanapaya.viewmodel.FoodViewModel
 import androidx.compose.ui.Alignment
+import androidx.navigation.NavHostController
 import com.anandamartiza0128.makanapaya.model.FoodConstants
 
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun CariMakananScreen(
+    navController: NavHostController,
     viewModel: FoodViewModel
 ) {
     val context = LocalContext.current
@@ -62,6 +68,15 @@ fun CariMakananScreen(
             TopAppBar(
                 title = {
                     Text(text = stringResource(id = R.string.cari_makanan))
+                },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.icon_back),
+                            tint = Color.White
+                        )
+                    }
                 },
                 colors = TopAppBarDefaults.mediumTopAppBarColors(
                     containerColor = ceriseColor,
@@ -173,6 +188,7 @@ fun CariMakananScreen(
         }
     }
 }
+
 
 
 
