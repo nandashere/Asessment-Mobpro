@@ -136,7 +136,7 @@ fun TambahMakananScreen(
                     .background(Color.LightGray),
                 contentAlignment = Alignment.Center
             ) {
-                if (formState.imageUri != null) {
+                if (formState.imageUri.isNotBlank()) {
                     Image(
                         painter = rememberAsyncImagePainter(formState.imageUri),
                         contentDescription = null,
