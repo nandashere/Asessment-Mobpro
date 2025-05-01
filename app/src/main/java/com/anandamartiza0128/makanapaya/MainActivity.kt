@@ -92,7 +92,7 @@ fun ScreenContent(modifier: Modifier = Modifier, navController: NavHostControlle
         ) {
             // Tambahkan gambar di atas tombol
             Image(
-                painter = painterResource(id = R.drawable.ic_launcher),
+                painter = painterResource(id = R.drawable.beomgyu),
                 contentDescription = stringResource(R.string.app_name),
                 modifier = Modifier
                     .size(120.dp) // ubah ukuran sesuai kebutuhan

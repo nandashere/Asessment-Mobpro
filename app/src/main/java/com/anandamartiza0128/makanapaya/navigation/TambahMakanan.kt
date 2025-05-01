@@ -71,7 +71,7 @@ fun TambahMakananScreen(
                 rasa = "",
                 tingkatPedas = "",
                 tekstur = "",
-                imageUri = null
+                imageUri = ""
             )
         )
     }
@@ -91,7 +91,7 @@ fun TambahMakananScreen(
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri ->
-            formState = formState.copy(imageUri = uri)
+            formState = formState.copy(imageUri = uri?.toString() ?: "")
         }
     )
 

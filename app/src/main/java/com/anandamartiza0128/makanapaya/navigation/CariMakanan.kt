@@ -40,6 +40,8 @@ import com.anandamartiza0128.makanapaya.viewmodel.FoodViewModel
 import androidx.compose.ui.Alignment
 import androidx.navigation.NavHostController
 import com.anandamartiza0128.makanapaya.model.FoodConstants
+import android.net.Uri
+
 
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -163,7 +165,7 @@ fun CariMakananScreen(
                     Text(stringResource(id = R.string.rekomendasi), fontWeight = FontWeight.Bold)
                     hasil.forEach { makanan ->
                         FoodlistItem(
-                            imageUri = makanan.imageUri,
+                            imageUri = Uri.parse(makanan.imageUri),
                             name = makanan.nama,
                             keywords = "${makanan.jenis}, ${makanan.rasa}, ${makanan.tingkatPedas}, ${makanan.tekstur}",
                             modifier = Modifier.padding(vertical = 4.dp)

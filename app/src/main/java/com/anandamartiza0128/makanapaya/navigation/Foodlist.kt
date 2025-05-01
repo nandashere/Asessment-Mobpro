@@ -101,7 +101,7 @@ fun FoodlistScreen(
                     ).joinToString(", ")
 
                     FoodlistItem(
-                        imageUri = item.imageUri,
+                        imageUri = item.imageUri.takeIf { it.isNotBlank() }?.let { Uri.parse(it) },
                         name = item.nama,
                         keywords = keywordGabungan
                     )
