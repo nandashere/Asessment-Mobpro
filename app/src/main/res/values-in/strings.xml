@@ -43,4 +43,6 @@
     <string name="tidak_pedas">Tidak Pedas</string>
     <string name="sedikit_pedas">Sedikit Pedas</string>
     <string name="simpan_makanan">Simpan Makanan</string>
+    <string name="list">Tampilan List</string>
+    <string name="grid">Tampilan Grid</string>
 </resources>

@@ -86,4 +86,7 @@
     </string-array>
 
     <string name="simpan_makanan">Save Food</string>
+
+    <string name="list">List View</string>
+    <string name="grid">Grid View</string>
 </resources>
