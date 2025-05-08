@@ -2,16 +2,24 @@ package com.anandamartiza0128.makanapaya.navigation
 
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -20,6 +28,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -34,21 +43,30 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.anandamartiza0128.makanapaya.R
+import com.anandamartiza0128.makanapaya.model.Makanan
+import com.anandamartiza0128.makanapaya.util.SettingsDataStore
 import com.anandamartiza0128.makanapaya.viewmodel.FoodViewModel
 import com.anandamartiza0128.makanapaya.viewmodel.MainViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -64,8 +82,8 @@ fun FoodlistScreen(
     val yellow = Color(ContextCompat.getColor(context, R.color.yellow))
     val subjectText = stringResource(R.string.foodlist_title)
     val subjectTextx = stringResource(R.string.share_foodlist_via)
-    var showList by remember { mutableStateOf(true) }
-
+    val dataStore = SettingsDataStore(LocalContext.current)
+    val showList by dataStore.layoutFlow.collectAsState(true)
     Scaffold(
         topBar = {
             TopAppBar(
@@ -84,7 +102,11 @@ fun FoodlistScreen(
                     titleContentColor = Color.White
                 ),
                 actions = {
-                    IconButton(onClick = { showList = !showList }) {
+                    IconButton(onClick = {
+                        CoroutineScope(Dispatchers.IO).launch {
+                            dataStore.saveLayout(!showList)
+                        }
+                    }) {
                         Icon(
                             painter = painterResource(
                                 if (showList) R.drawable.baseline_grid_view_24
@@ -114,23 +136,45 @@ fun FoodlistScreen(
                     color = Color.Gray
                 )
             } else {
-                foodList.forEach { item ->
-                    val keywordGabungan = listOfNotNull(
-                        item.jenis, item.rasa, item.tingkatPedas, item.tekstur
-                    ).joinToString(", ")
+                if (showList) {
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        items(foodList) { item ->
+                            val keywordGabungan = listOfNotNull(
+                                item.jenis, item.rasa, item.tingkatPedas, item.tekstur
+                            ).joinToString(", ")
 
-                    FoodlistItem(
-                        imageUri = item.imageUri.takeIf { it.isNotBlank() }?.let { Uri.parse(it) },
-                        name = item.nama,
-                        keywords = keywordGabungan,
-                        onEditClick = {
-                            navController.navigate(Screen.Detail.createRoute(item.id))
-                        },
-                        onDeleteClick = {
-                            viewModel.deleteMakanan(item)
+                            FoodlistItem(
+                                imageUri = item.imageUri.takeIf { it.isNotBlank() }?.let { Uri.parse(it) },
+                                name = item.nama,
+                                keywords = keywordGabungan,
+                                onEditClick = {
+                                    navController.navigate(Screen.Detail.createRoute(item.id))
+                                },
+                                onDeleteClick = {
+                                    viewModel.deleteMakanan(item)
+                                }
+                            )
                         }
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
+                    }
+                } else {
+                    LazyVerticalGrid(
+                        columns = GridCells.Adaptive(minSize = 160.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        items(foodList) { item ->
+                            GridItem(
+                                makanan = item,
+                                onClick = {
+                                    navController.navigate(Screen.Detail.createRoute(item.id))
+                                }
+                            )
+                        }
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -172,6 +216,7 @@ fun FoodlistScreen(
         }
     }
 }
+
 
 @Composable
 fun FoodlistItem(
@@ -239,6 +284,66 @@ fun FoodlistItem(
                     Text("Hapus", color = Color.Red)
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun GridItem(makanan: Makanan, onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+        ),
+        border = BorderStroke(1.dp, DividerDefaults.color)
+    ) {
+        Column(
+            modifier = Modifier.padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            if (!makanan.imageUri.isNullOrBlank()) {
+                AsyncImage(
+                    model = Uri.parse(makanan.imageUri),
+                    contentDescription = makanan.nama,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(1f)
+                        .clip(RoundedCornerShape(8.dp))
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Default.Image,
+                    contentDescription = makanan.nama,
+                    modifier = Modifier
+                        .size(100.dp)
+                        .padding(8.dp),
+                    tint = Color.Gray
+                )
+            }
+
+            Text(
+                text = makanan.nama,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            val keywordGabungan = listOfNotNull(
+                makanan.jenis, makanan.rasa, makanan.tingkatPedas, makanan.tekstur
+            ).joinToString(", ")
+
+            Text(
+                text = keywordGabungan,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }
