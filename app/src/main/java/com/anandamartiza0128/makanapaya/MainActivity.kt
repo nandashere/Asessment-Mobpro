@@ -2,6 +2,7 @@ package com.anandamartiza0128.makanapaya
 
 import android.content.res.Configuration
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -23,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -42,10 +44,18 @@ import com.anandamartiza0128.makanapaya.navigation.SetupNavGraph
 import com.anandamartiza0128.makanapaya.ui.theme.MakanApaYaTheme
 import com.anandamartiza0128.makanapaya.util.ViewModelFactory
 import com.anandamartiza0128.makanapaya.viewmodel.MainViewModel
+import com.anandamartiza0128.makanapaya.util.SanityCheckUtil
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Sanity check: pastikan context tidak null
+        requireNotNull(this) { "Context (MainActivity) is null!" }
+
+        Log.d("SanityCheck", "MainActivity initialized.")
+
         enableEdgeToEdge()
         setContent {
             MakanApaYaTheme {
@@ -88,6 +98,10 @@ fun ScreenContent(modifier: Modifier = Modifier, navController: NavHostControlle
 
     // Observasi data dari database
     val makananList by viewModel.makananList.collectAsState()
+
+    LaunchedEffect(makananList) {
+        SanityCheckUtil.performSanityCheck(context, makananList)
+    }
 
     val yellowColor = Color(ContextCompat.getColor(context, R.color.yellow))
 
