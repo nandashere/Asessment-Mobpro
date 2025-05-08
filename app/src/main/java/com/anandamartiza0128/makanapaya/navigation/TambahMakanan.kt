@@ -52,12 +52,13 @@ import com.anandamartiza0128.makanapaya.components.DropDownField
 import com.anandamartiza0128.makanapaya.model.Makanan
 import com.anandamartiza0128.makanapaya.viewmodel.FoodViewModel
 import com.anandamartiza0128.makanapaya.model.FoodConstants
+import com.anandamartiza0128.makanapaya.viewmodel.MainViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TambahMakananScreen(
     navController: NavHostController,
-    viewModel: FoodViewModel
+    viewModel: MainViewModel
 ) {
     val context = LocalContext.current
     val ceriseColor = Color(ContextCompat.getColor(context, R.color.cerise))

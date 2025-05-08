@@ -21,15 +21,24 @@ class DetailViewModel(private val dao: MakananDao) : ViewModel() {
         }
     }
 
-    fun updateField(jenis: String, rasa: String, tingkatPedas: String, tekstur: String, nama: String) {
+    fun updateField(
+        jenis: String,
+        rasa: String,
+        tingkatPedas: String,
+        tekstur: String,
+        nama: String,
+        imageUri: String
+    ) {
         _uiState.value = _uiState.value.copy(
             jenis = jenis,
             rasa = rasa,
             tingkatPedas = tingkatPedas,
             tekstur = tekstur,
-            nama = nama
+            nama = nama,
+            imageUri = imageUri
         )
     }
+
 
     fun saveMakanan() {
         viewModelScope.launch {

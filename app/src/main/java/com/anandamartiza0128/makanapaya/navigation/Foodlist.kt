@@ -28,6 +28,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,6 +42,7 @@ import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.anandamartiza0128.makanapaya.R
 import com.anandamartiza0128.makanapaya.viewmodel.FoodViewModel
+import com.anandamartiza0128.makanapaya.viewmodel.MainViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -47,9 +50,9 @@ import com.anandamartiza0128.makanapaya.viewmodel.FoodViewModel
 fun FoodlistScreen(
     modifier: Modifier = Modifier,
     navController: NavHostController,
-    viewModel: FoodViewModel
+    viewModel: MainViewModel
 ) {
-    val foodList = viewModel.foodList
+    val foodList by viewModel.makananList.collectAsState()
     val context = LocalContext.current
     val cerise = Color(ContextCompat.getColor(context, R.color.cerise))
     val yellow = Color(ContextCompat.getColor(context, R.color.yellow))

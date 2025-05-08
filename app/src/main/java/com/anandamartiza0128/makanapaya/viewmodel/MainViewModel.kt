@@ -7,10 +7,11 @@ import com.anandamartiza0128.makanapaya.model.Makanan
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
-class MainViewModel(dao: MakananDao) : ViewModel() {
+class MainViewModel(private val dao: MakananDao) : ViewModel() {
 
-    // Mengambil semua data makanan dari DAO, dikonversi jadi StateFlow
+    // Menyimpan semua makanan dari database dalam bentuk StateFlow
     val makananList: StateFlow<List<Makanan>> = dao.getMakanan()
         .stateIn(
             scope = viewModelScope,
@@ -18,7 +19,14 @@ class MainViewModel(dao: MakananDao) : ViewModel() {
             initialValue = emptyList()
         )
 
-    // Fungsi cari rekomendasi seperti sebelumnya, tapi pakai makananList dari DB
+    // ✅ Tambahkan fungsi insert data ke database
+    fun addMakanan(makanan: Makanan) {
+        viewModelScope.launch {
+            dao.insert(makanan)
+        }
+    }
+
+    // Fungsi cari rekomendasi
     fun cariRekomendasi(
         jenis: String,
         rasa: String,
@@ -39,7 +47,7 @@ class MainViewModel(dao: MakananDao) : ViewModel() {
             .map { it.first }
     }
 
-    // Untuk akses satu makanan berdasarkan ID
+    // Ambil satu makanan berdasarkan ID
     fun getMakananById(id: Long): Makanan? {
         return makananList.value.find { it.id.toLong() == id }
     }

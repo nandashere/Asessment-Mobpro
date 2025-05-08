@@ -41,14 +41,14 @@ import androidx.compose.ui.Alignment
 import androidx.navigation.NavHostController
 import com.anandamartiza0128.makanapaya.model.FoodConstants
 import android.net.Uri
-
+import com.anandamartiza0128.makanapaya.viewmodel.MainViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun CariMakananScreen(
     navController: NavHostController,
-    viewModel: FoodViewModel
+    viewModel: MainViewModel
 ) {
     val context = LocalContext.current
     val ceriseColor = Color(ContextCompat.getColor(context, R.color.cerise))
