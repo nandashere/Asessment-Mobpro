@@ -90,4 +90,7 @@
     <string name="list">List View</string>
     <string name="grid">Grid View</string>
     <string name="gambar_kosong">you have not included an image</string>
+    <string name="pesan_hapus">Delete this item?</string>
+    <string name="tombol_hapus">Delete</string>
+    <string name="tombol_batal">Cancel</string>
 </resources>

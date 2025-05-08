@@ -46,4 +46,7 @@
     <string name="list">Tampilan List</string>
     <string name="grid">Tampilan Grid</string>
     <string name="gambar_kosong">kamu belum memasukkan gambar</string>
+    <string name="pesan_hapus">Hapus Item Ini?</string>
+    <string name="tombol_hapus">Hapus</string>
+    <string name="tombol_batal">Batal</string>
 </resources>

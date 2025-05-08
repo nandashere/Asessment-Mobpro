@@ -41,6 +41,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -79,6 +82,10 @@ fun FoodlistScreen(
     val subjectTextx = stringResource(R.string.share_foodlist_via)
     val dataStore = SettingsDataStore(LocalContext.current)
     val showList by dataStore.layoutFlow.collectAsState(true)
+
+    var showDialog by remember { mutableStateOf(false) }
+    var selectedFoodItem by remember { mutableStateOf<Makanan?>(null) } // Item yang akan dihapus
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -149,7 +156,9 @@ fun FoodlistScreen(
                                     navController.navigate(Screen.Detail.createRoute(item.id))
                                 },
                                 onDeleteClick = {
-                                    viewModel.deleteMakanan(item)
+                                    // Set food item yang akan dihapus
+                                    selectedFoodItem = item
+                                    showDialog = true
                                 }
                             )
                         }
@@ -209,6 +218,19 @@ fun FoodlistScreen(
                 }
             }
         }
+    }
+
+    // DisplayAlertDialog untuk konfirmasi hapus
+    if (showDialog && selectedFoodItem != null) {
+        DisplayAlertDialog(
+            onDismissRequest = { showDialog = false },
+            onConfirmation = {
+                selectedFoodItem?.let {
+                    viewModel.deleteMakanan(it)
+                }
+                showDialog = false
+            }
+        )
     }
 }
 
@@ -273,15 +295,16 @@ fun FoodlistItem(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 TextButton(onClick = onEditClick) {
-                    Text("Edit")
+                    Text(stringResource(R.string.edit))
                 }
                 TextButton(onClick = onDeleteClick) {
-                    Text("Hapus", color = Color.Red)
+                    Text(stringResource(R.string.tombol_hapus), color = Color.Red)
                 }
             }
         }
     }
 }
+
 
 @Composable
 fun GridItem(makanan: Makanan, onClick: () -> Unit) {
