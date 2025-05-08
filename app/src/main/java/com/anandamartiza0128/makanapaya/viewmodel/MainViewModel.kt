@@ -26,6 +26,12 @@ class MainViewModel(private val dao: MakananDao) : ViewModel() {
         }
     }
 
+    fun deleteMakanan(makanan: Makanan) {
+        viewModelScope.launch {
+            dao.delete(makanan)
+        }
+    }
+
     // Fungsi cari rekomendasi
     fun cariRekomendasi(
         jenis: String,

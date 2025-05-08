@@ -2,6 +2,7 @@ package com.anandamartiza0128.makanapaya.navigation
 
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -25,6 +26,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -59,13 +61,10 @@ fun FoodlistScreen(
     val subjectText = stringResource(R.string.foodlist_title)
     val subjectTextx = stringResource(R.string.share_foodlist_via)
 
-
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    Text(text = stringResource(R.string.foodlist))
-                },
+                title = { Text(text = stringResource(R.string.foodlist)) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
@@ -97,23 +96,25 @@ fun FoodlistScreen(
             } else {
                 foodList.forEach { item ->
                     val keywordGabungan = listOfNotNull(
-                        item.jenis,
-                        item.rasa,
-                        item.tingkatPedas,
-                        item.tekstur
+                        item.jenis, item.rasa, item.tingkatPedas, item.tekstur
                     ).joinToString(", ")
 
                     FoodlistItem(
                         imageUri = item.imageUri.takeIf { it.isNotBlank() }?.let { Uri.parse(it) },
                         name = item.nama,
-                        keywords = keywordGabungan
+                        keywords = keywordGabungan,
+                        onEditClick = {
+                            navController.navigate(Screen.Detail.createRoute(item.id))
+                        },
+                        onDeleteClick = {
+                            viewModel.deleteMakanan(item)
+                        }
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Tombol Share
                 Button(
                     onClick = {
                         val shareText = foodList.joinToString("\n\n") { item ->
@@ -152,60 +153,75 @@ fun FoodlistScreen(
     }
 }
 
-
 @Composable
 fun FoodlistItem(
     imageUri: Uri?,
     name: String,
     keywords: String,
+    onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
+        onClick = onEditClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            if (imageUri != null) {
-                AsyncImage(
-                    model = imageUri,
-                    contentDescription = name,
-                    modifier = Modifier.size(80.dp),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                Icon(
-                    imageVector = Icons.Default.Image,
-                    contentDescription = name,
-                    modifier = Modifier.size(80.dp),
-                    tint = Color.Gray
-                )
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (imageUri != null) {
+                    AsyncImage(
+                        model = imageUri,
+                        contentDescription = name,
+                        modifier = Modifier.size(80.dp),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Image,
+                        contentDescription = name,
+                        modifier = Modifier.size(80.dp),
+                        tint = Color.Gray
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                Column {
+                    Text(
+                        text = name,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = keywords,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
-            Column {
-                Text(
-                    text = name,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = keywords,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                horizontalArrangement = Arrangement.End,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                TextButton(onClick = onEditClick) {
+                    Text("Edit")
+                }
+                TextButton(onClick = onDeleteClick) {
+                    Text("Hapus", color = Color.Red)
+                }
             }
         }
     }
 }
-
 
 
 //@Preview(showBackground = true)

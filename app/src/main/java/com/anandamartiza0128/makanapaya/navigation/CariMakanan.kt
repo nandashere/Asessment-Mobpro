@@ -168,8 +168,11 @@ fun CariMakananScreen(
                             imageUri = Uri.parse(makanan.imageUri),
                             name = makanan.nama,
                             keywords = "${makanan.jenis}, ${makanan.rasa}, ${makanan.tingkatPedas}, ${makanan.tekstur}",
-                            modifier = Modifier.padding(vertical = 4.dp)
+                            modifier = Modifier.padding(vertical = 4.dp),
+                            onEditClick = {}, // atau navigasi ke halaman edit kalau mau
+                            onDeleteClick = {} // atau konfirmasi hapus
                         )
+
                     }
                 } else {
                     Text(stringResource(id = R.string.tidak_ada_makanan), color = Color.Gray)
