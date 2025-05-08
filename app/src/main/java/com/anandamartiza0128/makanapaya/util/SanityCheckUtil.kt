@@ -9,6 +9,7 @@ import com.anandamartiza0128.makanapaya.model.Makanan
 object SanityCheckUtil {
 
     fun performSanityCheck(context: Context, makananList: List<Makanan>) {
+
         // Check context
         requireNotNull(context) { "Context is null in sanity check" }
 

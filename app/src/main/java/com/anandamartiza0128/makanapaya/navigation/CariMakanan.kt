@@ -36,7 +36,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.anandamartiza0128.makanapaya.R
 import com.anandamartiza0128.makanapaya.model.Makanan
-import com.anandamartiza0128.makanapaya.viewmodel.FoodViewModel
 import androidx.compose.ui.Alignment
 import androidx.navigation.NavHostController
 import com.anandamartiza0128.makanapaya.model.FoodConstants

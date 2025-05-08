@@ -50,7 +50,6 @@ import coil.compose.rememberAsyncImagePainter
 import com.anandamartiza0128.makanapaya.R
 import com.anandamartiza0128.makanapaya.components.DropDownField
 import com.anandamartiza0128.makanapaya.model.Makanan
-import com.anandamartiza0128.makanapaya.viewmodel.FoodViewModel
 import com.anandamartiza0128.makanapaya.model.FoodConstants
 import com.anandamartiza0128.makanapaya.util.copyUriToInternalStorage
 import com.anandamartiza0128.makanapaya.viewmodel.MainViewModel
@@ -90,6 +89,7 @@ fun TambahMakananScreen(
     val listTekstur = FoodConstants.getListTekstur(context)
 
     var showError by remember { mutableStateOf(false) }
+    var showImageError by remember { mutableStateOf(false) }
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
@@ -101,10 +101,10 @@ fun TambahMakananScreen(
                     "img_${System.currentTimeMillis()}.jpg"
                 )
                 formState = formState.copy(imageUri = copiedPath)
+                showImageError = false // Reset error when an image is picked
             }
         }
     )
-
 
     Scaffold(
         topBar = {
@@ -170,6 +170,16 @@ fun TambahMakananScreen(
                 Text(stringResource(R.string.tambahkan_gambar), color = ceriseColor)
             }
 
+            // Error handling for empty image URI
+            if (showImageError) {
+                Text(
+                    text = stringResource(R.string.gambar_kosong),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                )
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
 
             // Form Field Nama Makanan dengan Validasi
@@ -192,8 +202,10 @@ fun TambahMakananScreen(
                 onItemSelected = {
                     formState = formState.copy(jenis = it)
                     expandedJenis = false
+                    if (showError && formState.jenis.isNotBlank()) showError = false
                 },
-                items = listJenis
+                items = listJenis,
+                isError = showError && formState.jenis.isBlank()
             )
 
             DropDownField(
@@ -204,8 +216,10 @@ fun TambahMakananScreen(
                 onItemSelected = {
                     formState = formState.copy(rasa = it)
                     expandedRasa = false
+                    if (showError && formState.rasa.isNotBlank()) showError = false
                 },
-                items = listRasa
+                items = listRasa,
+                isError = showError && formState.rasa.isBlank()
             )
 
             DropDownField(
@@ -216,8 +230,10 @@ fun TambahMakananScreen(
                 onItemSelected = {
                     formState = formState.copy(tingkatPedas = it)
                     expandedPedas = false
+                    if (showError && formState.tingkatPedas.isNotBlank()) showError = false
                 },
-                items = listPedas
+                items = listPedas,
+                isError = showError && formState.tingkatPedas.isBlank()
             )
 
             DropDownField(
@@ -228,8 +244,10 @@ fun TambahMakananScreen(
                 onItemSelected = {
                     formState = formState.copy(tekstur = it)
                     expandedTekstur = false
+                    if (showError && formState.tekstur.isNotBlank()) showError = false
                 },
-                items = listTekstur
+                items = listTekstur,
+                isError = showError && formState.tekstur.isBlank()
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -238,6 +256,8 @@ fun TambahMakananScreen(
                 onClick = {
                     if (formState.nama.isBlank()) {
                         showError = true
+                    } else if (formState.imageUri.isBlank()) {
+                        showImageError = true
                     } else {
                         viewModel.addMakanan(formState)
                         navController.popBackStack()
@@ -253,6 +273,16 @@ fun TambahMakananScreen(
     }
 }
 
+
+@Composable
+fun ErrorText() {
+    Text(
+        text = stringResource(R.string.kolom_kosong),
+        color = Color.Red,
+        style = MaterialTheme.typography.labelSmall,
+        modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
+    )
+}
 
 @Composable
 fun FormField(

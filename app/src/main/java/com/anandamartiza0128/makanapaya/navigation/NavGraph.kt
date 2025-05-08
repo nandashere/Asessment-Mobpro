@@ -11,7 +11,6 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.anandamartiza0128.makanapaya.MainScreen
 import com.anandamartiza0128.makanapaya.util.ViewModelFactory
-import com.anandamartiza0128.makanapaya.viewmodel.FoodViewModel
 import com.anandamartiza0128.makanapaya.viewmodel.MainViewModel
 
 // Menyimpan daftar rute navigasi yang mungkin dari satu screen ke screen lainnya

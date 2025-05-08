@@ -15,6 +15,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuDefaults.TrailingIcon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.ui.res.stringResource
+import com.anandamartiza0128.makanapaya.R
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -25,12 +27,14 @@ fun DropDownField(
     expanded: Boolean,
     onExpandedChange: (Boolean) -> Unit,
     onItemSelected: (String) -> Unit,
-    items: List<String>
+    items: List<String>,
+    isError: Boolean = false
 ) {
-    Column(modifier = Modifier
-        .fillMaxWidth()
-        .padding(vertical = 4.dp)) {
-
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+    ) {
         Text(label, style = MaterialTheme.typography.labelMedium)
 
         ExposedDropdownMenuBox(
@@ -42,6 +46,7 @@ fun DropDownField(
                 value = value,
                 onValueChange = {},
                 readOnly = true,
+                isError = isError,
                 modifier = Modifier
                     .menuAnchor()
                     .fillMaxWidth(),
@@ -65,6 +70,15 @@ fun DropDownField(
                     )
                 }
             }
+        }
+
+        if (isError) {
+            Text(
+                text = stringResource(R.string.kolom_kosong),
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.labelSmall,
+                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+            )
         }
     }
 }
