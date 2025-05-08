@@ -85,5 +85,5 @@
         <item>@string/tekstur_berkuah</item>
     </string-array>
 
-
+    <string name="simpan_makanan">Save Food</string>
 </resources>

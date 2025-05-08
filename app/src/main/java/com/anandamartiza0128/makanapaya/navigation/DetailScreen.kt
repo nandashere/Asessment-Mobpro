@@ -1,0 +1,263 @@
+package com.anandamartiza0128.makanapaya.navigation
+
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
+import com.anandamartiza0128.makanapaya.R
+import com.anandamartiza0128.makanapaya.components.DropDownField
+import com.anandamartiza0128.makanapaya.model.FoodConstants
+import com.anandamartiza0128.makanapaya.util.ViewModelFactory
+import com.anandamartiza0128.makanapaya.viewmodel.DetailViewModel
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DetailScreen(
+    id: Int,
+    navController: NavController,
+    viewModel: DetailViewModel = viewModel(factory = ViewModelFactory(LocalContext.current))
+) {
+    val makanan by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+    val ceriseColor = Color(ContextCompat.getColor(context, R.color.cerise))
+    val yellowColor = Color(ContextCompat.getColor(context, R.color.yellow))
+
+    var expandedJenis by remember { mutableStateOf(false) }
+    var expandedRasa by remember { mutableStateOf(false) }
+    var expandedPedas by remember { mutableStateOf(false) }
+    var expandedTekstur by remember { mutableStateOf(false) }
+
+    val listJenis = FoodConstants.getListJenis(context)
+    val listRasa = FoodConstants.getListRasa(context)
+    val listPedas = FoodConstants.getListPedas(context)
+    val listTekstur = FoodConstants.getListTekstur(context)
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+        onResult = { uri ->
+            viewModel.updateField(
+                nama = makanan.nama,
+                jenis = makanan.jenis,
+                rasa = makanan.rasa,
+                tingkatPedas = makanan.tingkatPedas,
+                tekstur = makanan.tekstur,
+                imageUri = uri?.toString() ?: ""
+            )
+        }
+    )
+
+    LaunchedEffect(id) {
+        viewModel.loadMakananById(id.toLong())
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.foodlist)) },
+                colors = TopAppBarDefaults.mediumTopAppBarColors(
+                    containerColor = ceriseColor,
+                    titleContentColor = Color.White
+                ),
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.icon_back),
+                            tint = Color.White
+                        )
+                    }
+                }
+            )
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState())
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = stringResource(R.string.masukkan_gambar),
+                style = MaterialTheme.typography.labelLarge,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+
+            Box(
+                modifier = Modifier
+                    .size(100.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color.LightGray),
+                contentAlignment = Alignment.Center
+            ) {
+                if (makanan.imageUri.isNotBlank()) {
+                    Image(
+                        painter = rememberAsyncImagePainter(makanan.imageUri),
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Image,
+                        contentDescription = null,
+                        tint = Color.Gray,
+                        modifier = Modifier.size(48.dp)
+                    )
+                }
+            }
+
+            TextButton(onClick = {
+                launcher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            }) {
+                Text(stringResource(R.string.tambahkan_gambar), color = ceriseColor)
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Form Field Nama Makanan
+            FormField(
+                label = stringResource(R.string.nama_makanan),
+                value = makanan.nama,
+                onValueChange = {
+                    viewModel.updateField(
+                        nama = it,
+                        jenis = makanan.jenis,
+                        rasa = makanan.rasa,
+                        tingkatPedas = makanan.tingkatPedas,
+                        tekstur = makanan.tekstur,
+                        imageUri = makanan.imageUri
+                    )
+                }
+            )
+
+            DropDownField(
+                label = stringResource(R.string.jenis_makanan),
+                value = makanan.jenis,
+                expanded = expandedJenis,
+                onExpandedChange = { expandedJenis = it },
+                onItemSelected = {
+                    viewModel.updateField(
+                        nama = makanan.nama,
+                        jenis = it,
+                        rasa = makanan.rasa,
+                        tingkatPedas = makanan.tingkatPedas,
+                        tekstur = makanan.tekstur,
+                        imageUri = makanan.imageUri
+                    )
+                    expandedJenis = false
+                },
+                items = listJenis
+            )
+
+            DropDownField(
+                label = stringResource(R.string.rasa_makanan),
+                value = makanan.rasa,
+                expanded = expandedRasa,
+                onExpandedChange = { expandedRasa = it },
+                onItemSelected = {
+                    viewModel.updateField(
+                        nama = makanan.nama,
+                        jenis = makanan.jenis,
+                        rasa = it,
+                        tingkatPedas = makanan.tingkatPedas,
+                        tekstur = makanan.tekstur,
+                        imageUri = makanan.imageUri
+                    )
+                    expandedRasa = false
+                },
+                items = listRasa
+            )
+
+            DropDownField(
+                label = stringResource(R.string.tingkat_kepedasan),
+                value = makanan.tingkatPedas,
+                expanded = expandedPedas,
+                onExpandedChange = { expandedPedas = it },
+                onItemSelected = {
+                    viewModel.updateField(
+                        nama = makanan.nama,
+                        jenis = makanan.jenis,
+                        rasa = makanan.rasa,
+                        tingkatPedas = it,
+                        tekstur = makanan.tekstur,
+                        imageUri = makanan.imageUri
+                    )
+                    expandedPedas = false
+                },
+                items = listPedas
+            )
+
+            DropDownField(
+                label = stringResource(R.string.tekstur_makanan),
+                value = makanan.tekstur,
+                expanded = expandedTekstur,
+                onExpandedChange = { expandedTekstur = it },
+                onItemSelected = {
+                    viewModel.updateField(
+                        nama = makanan.nama,
+                        jenis = makanan.jenis,
+                        rasa = makanan.rasa,
+                        tingkatPedas = makanan.tingkatPedas,
+                        tekstur = it,
+                        imageUri = makanan.imageUri
+                    )
+                    expandedTekstur = false
+                },
+                items = listTekstur
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Button(
+                onClick = {
+                    viewModel.saveMakanan()
+                    navController.popBackStack()
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = yellowColor),
+                shape = RoundedCornerShape(50)
+            ) {
+                Text(stringResource(R.string.simpan_makanan), color = Color.White)
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Button(
+                onClick = {
+                    viewModel.deleteMakanan()
+                    navController.popBackStack()
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+            ) {
+                Text("Hapus", color = Color.White)
+            }
+        }
+    }
+}
