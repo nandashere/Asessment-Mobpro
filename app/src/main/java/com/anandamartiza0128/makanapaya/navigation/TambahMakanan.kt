@@ -52,7 +52,9 @@ import com.anandamartiza0128.makanapaya.components.DropDownField
 import com.anandamartiza0128.makanapaya.model.Makanan
 import com.anandamartiza0128.makanapaya.viewmodel.FoodViewModel
 import com.anandamartiza0128.makanapaya.model.FoodConstants
+import com.anandamartiza0128.makanapaya.util.copyUriToInternalStorage
 import com.anandamartiza0128.makanapaya.viewmodel.MainViewModel
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -92,9 +94,17 @@ fun TambahMakananScreen(
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri ->
-            formState = formState.copy(imageUri = uri?.toString() ?: "")
+            if (uri != null) {
+                val copiedPath = copyUriToInternalStorage(
+                    context,
+                    uri,
+                    "img_${System.currentTimeMillis()}.jpg"
+                )
+                formState = formState.copy(imageUri = copiedPath)
+            }
         }
     )
+
 
     Scaffold(
         topBar = {
@@ -139,7 +149,7 @@ fun TambahMakananScreen(
             ) {
                 if (formState.imageUri.isNotBlank()) {
                     Image(
-                        painter = rememberAsyncImagePainter(formState.imageUri),
+                        painter = rememberAsyncImagePainter(File(formState.imageUri)),
                         contentDescription = null,
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
