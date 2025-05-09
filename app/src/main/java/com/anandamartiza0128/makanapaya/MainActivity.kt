@@ -201,7 +201,6 @@ fun ScreenContent(modifier: Modifier = Modifier, navController: NavHostControlle
                 Text(text = stringResource(R.string.tombol_foodlist))
             }
 
-            // Optional: tampilkan jumlah data makanan (untuk debug/indikasi Room jalan)
             Text(
                 text = "Jumlah makanan: ${makananList.size}",
                 style = MaterialTheme.typography.bodySmall,
