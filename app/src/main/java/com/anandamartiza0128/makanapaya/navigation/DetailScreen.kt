@@ -243,19 +243,6 @@ fun DetailScreen(
             ) {
                 Text(stringResource(R.string.simpan_makanan), color = Color.White)
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Button(
-                onClick = {
-                    viewModel.deleteMakanan()
-                    navController.popBackStack()
-                },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
-            ) {
-                Text("Hapus", color = Color.White)
-            }
         }
     }
 }
