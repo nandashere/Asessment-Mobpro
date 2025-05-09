@@ -15,6 +15,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults.buttonColors
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,8 +32,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,20 +55,27 @@ import com.anandamartiza0128.makanapaya.ui.theme.MakanApaYaTheme
 import com.anandamartiza0128.makanapaya.util.ViewModelFactory
 import com.anandamartiza0128.makanapaya.viewmodel.MainViewModel
 import com.anandamartiza0128.makanapaya.util.SanityCheckUtil
+import com.anandamartiza0128.makanapaya.util.SettingsDataStore
+import com.anandamartiza0128.makanapaya.viewmodel.ThemeViewModel
+import kotlinx.coroutines.launch
 
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Sanity check: pastikan context tidak null
+        // Sanity check
         requireNotNull(this) { "Context (MainActivity) is null!" }
-
         Log.d("SanityCheck", "MainActivity initialized.")
 
         enableEdgeToEdge()
+
         setContent {
-            MakanApaYaTheme {
+            val factory = ViewModelFactory(applicationContext)
+            val themeViewModel: ThemeViewModel = viewModel(factory = factory)
+            val isDarkTheme by themeViewModel.isDarkTheme.observeAsState(initial = false)
+
+            MakanApaYaTheme(darkTheme = isDarkTheme) {
                 SetupNavGraph()
             }
         }
@@ -75,11 +87,28 @@ class MainActivity : ComponentActivity() {
 fun MainScreen(navController: NavHostController) {
     val context = LocalContext.current                                           // akses resources dari Android framework(color.xml, string.xml,dll.)
     val ceriseColor = Color(ContextCompat.getColor(context, R.color.cerise))    // pakai warna dari file colors.xml
+    val settingsDataStore = remember { SettingsDataStore(context) }
+    val scope = rememberCoroutineScope()
+    val isDarkTheme by settingsDataStore.themeFlow.collectAsState(initial = false)
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(text = stringResource(id = R.string.app_name))
+                },
+                actions = {
+                    IconButton(onClick = {
+                        scope.launch {
+                            settingsDataStore.saveTheme(!isDarkTheme)
+                        }
+                    }) {
+                        Icon(
+                            imageVector = if (isDarkTheme) Icons.Default.DarkMode else Icons.Default.LightMode,
+                            contentDescription = "Toggle Theme",
+                            tint = Color.White
+                        )
+                    }
                 },
                 colors = TopAppBarDefaults.mediumTopAppBarColors(
                     containerColor = ceriseColor,
