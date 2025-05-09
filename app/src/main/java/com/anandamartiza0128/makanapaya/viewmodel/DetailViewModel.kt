@@ -49,10 +49,4 @@ class DetailViewModel(private val dao: MakananDao) : ViewModel() {
             }
         }
     }
-
-    fun deleteMakanan() {
-        viewModelScope.launch {
-            dao.delete(_uiState.value)
-        }
-    }
 }

@@ -52,9 +52,4 @@ class MainViewModel(private val dao: MakananDao) : ViewModel() {
             .sortedByDescending { it.second }
             .map { it.first }
     }
-
-    // Ambil satu makanan berdasarkan ID
-    fun getMakananById(id: Long): Makanan? {
-        return makananList.value.find { it.id.toLong() == id }
-    }
 }

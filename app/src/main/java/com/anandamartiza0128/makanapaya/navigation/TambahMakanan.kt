@@ -275,16 +275,6 @@ fun TambahMakananScreen(
 
 
 @Composable
-fun ErrorText() {
-    Text(
-        text = stringResource(R.string.kolom_kosong),
-        color = Color.Red,
-        style = MaterialTheme.typography.labelSmall,
-        modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
-    )
-}
-
-@Composable
 fun FormField(
     label: String,
     value: String,
