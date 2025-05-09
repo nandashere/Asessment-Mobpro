@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -67,254 +68,263 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun FoodlistScreen(
-    modifier: Modifier = Modifier,
-    navController: NavHostController,
-    viewModel: MainViewModel
-) {
-    val foodList by viewModel.makananList.collectAsState()
-    val context = LocalContext.current
-    val cerise = Color(ContextCompat.getColor(context, R.color.cerise))
-    val yellow = Color(ContextCompat.getColor(context, R.color.yellow))
-    val subjectText = stringResource(R.string.foodlist_title)
-    val subjectTextx = stringResource(R.string.share_foodlist_via)
-    val dataStore = SettingsDataStore(LocalContext.current)
-    val showList by dataStore.layoutFlow.collectAsState(true)
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun FoodlistScreen(
+        modifier: Modifier = Modifier,
+        navController: NavHostController,
+        viewModel: MainViewModel
+    ) {
+        val foodList by viewModel.makananList.collectAsState()
+        val context = LocalContext.current
+        val cerise = Color(ContextCompat.getColor(context, R.color.cerise))
+        val yellow = Color(ContextCompat.getColor(context, R.color.yellow))
+        val subjectText = stringResource(R.string.foodlist_title)
+        val subjectTextx = stringResource(R.string.share_foodlist_via)
+        val dataStore = SettingsDataStore(LocalContext.current)
+        val showList by dataStore.layoutFlow.collectAsState(true)
 
-    var showDialog by remember { mutableStateOf(false) }
-    var selectedFoodItem by remember { mutableStateOf<Makanan?>(null) } // Item yang akan dihapus
+        var showDialog by remember { mutableStateOf(false) }
+        var selectedFoodItem by remember { mutableStateOf<Makanan?>(null) } // Item yang akan dihapus
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(text = stringResource(R.string.foodlist)) },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.icon_back),
-                            tint = Color.White
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.mediumTopAppBarColors(
-                    containerColor = cerise,
-                    titleContentColor = Color.White
-                ),
-                actions = {
-                    IconButton(onClick = {
-                        CoroutineScope(Dispatchers.IO).launch {
-                            dataStore.saveLayout(!showList)
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text(text = stringResource(R.string.foodlist)) },
+                    navigationIcon = {
+                        IconButton(onClick = { navController.popBackStack() }) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(R.string.icon_back),
+                                tint = Color.White
+                            )
                         }
-                    }) {
-                        Icon(
-                            painter = painterResource(
-                                if (showList) R.drawable.baseline_grid_view_24
-                                else R.drawable.baseline_view_list_24
-                            ),
-                            contentDescription = stringResource(
-                                if (showList) R.string.grid
-                                else R.string.list
-                            ),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
+                    },
+                    colors = TopAppBarDefaults.mediumTopAppBarColors(
+                        containerColor = cerise,
+                        titleContentColor = Color.White
+                    ),
+                    actions = {
+                        IconButton(onClick = {
+                            CoroutineScope(Dispatchers.IO).launch {
+                                dataStore.saveLayout(!showList)
+                            }
+                        }) {
+                            Icon(
+                                painter = painterResource(
+                                    if (showList) R.drawable.baseline_grid_view_24
+                                    else R.drawable.baseline_view_list_24
+                                ),
+                                contentDescription = stringResource(
+                                    if (showList) R.string.grid
+                                    else R.string.list
+                                ),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     }
+                )
+            }
+        ) { innerPadding ->
+            Column(
+                modifier = modifier
+                    .padding(innerPadding)
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                if (foodList.isEmpty()) {
+                    Text(
+                        text = stringResource(R.string.no_food_added),
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        color = Color.Gray
+                    )
+                } else {
+                    if (showList) {
+                        LazyColumn(
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            items(foodList) { item ->
+                                val keywordGabungan = listOfNotNull(
+                                    item.jenis, item.rasa, item.tingkatPedas, item.tekstur
+                                ).joinToString(", ")
+
+                                FoodlistItem(
+                                    imageUri = item.imageUri.takeIf { it.isNotBlank() }?.let { Uri.parse(it) },
+                                    name = item.nama,
+                                    keywords = keywordGabungan,
+                                    onEditClick = {
+                                        navController.navigate(Screen.Detail.createRoute(item.id))
+                                    },
+                                    onDeleteClick = {
+                                        // Set food item yang akan dihapus
+                                        selectedFoodItem = item
+                                        showDialog = true
+                                    }
+                                )
+                            }
+                        }
+                    } else {
+                        LazyVerticalGrid(
+                            columns = GridCells.Adaptive(minSize = 160.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            items(foodList) { item ->
+                                GridItem(
+                                    makanan = item,
+                                    onClick = {
+                                        navController.navigate(Screen.Detail.createRoute(item.id))
+                                    },
+                                    onEditClick = {
+                                        navController.navigate(Screen.Detail.createRoute(item.id))
+                                    },
+                                    onDeleteClick = {
+                                        selectedFoodItem = item
+                                        showDialog = true
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Button(
+                        onClick = {
+                            val shareText = foodList.joinToString("\n\n") { item ->
+                                buildString {
+                                    append("🍽️ ${item.nama}\n")
+                                    append("• Jenis: ${item.jenis}\n")
+                                    append("• Rasa: ${item.rasa}\n")
+                                    append("• Tingkat Pedas: ${item.tingkatPedas}\n")
+                                    append("• Tekstur: ${item.tekstur}")
+                                }
+                            }
+
+                            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                type = "text/plain"
+                                putExtra(Intent.EXTRA_SUBJECT, subjectText)
+                                putExtra(Intent.EXTRA_TEXT, shareText)
+                            }
+
+                            context.startActivity(
+                                Intent.createChooser(shareIntent, subjectTextx)
+                            )
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = yellow,
+                            contentColor = Color.White
+                        ),
+                        shape = RoundedCornerShape(50),
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .fillMaxWidth()
+                    ) {
+                        Text(text = stringResource(R.string.share_foodlist))
+                    }
+                }
+            }
+        }
+
+        // DisplayAlertDialog untuk konfirmasi hapus
+        if (showDialog && selectedFoodItem != null) {
+            DisplayAlertDialog(
+                onDismissRequest = { showDialog = false },
+                onConfirmation = {
+                    selectedFoodItem?.let {
+                        viewModel.deleteMakanan(it)
+                    }
+                    showDialog = false
                 }
             )
         }
-    ) { innerPadding ->
-        Column(
-            modifier = modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
-            if (foodList.isEmpty()) {
-                Text(
-                    text = stringResource(R.string.no_food_added),
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
-                    color = Color.Gray
-                )
-            } else {
-                if (showList) {
-                    LazyColumn(
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        items(foodList) { item ->
-                            val keywordGabungan = listOfNotNull(
-                                item.jenis, item.rasa, item.tingkatPedas, item.tekstur
-                            ).joinToString(", ")
+    }
 
-                            FoodlistItem(
-                                imageUri = item.imageUri.takeIf { it.isNotBlank() }?.let { Uri.parse(it) },
-                                name = item.nama,
-                                keywords = keywordGabungan,
-                                onEditClick = {
-                                    navController.navigate(Screen.Detail.createRoute(item.id))
-                                },
-                                onDeleteClick = {
-                                    // Set food item yang akan dihapus
-                                    selectedFoodItem = item
-                                    showDialog = true
-                                }
-                            )
-                        }
+
+    @Composable
+    fun FoodlistItem(
+        imageUri: Uri?,
+        name: String,
+        keywords: String,
+        onEditClick: () -> Unit,
+        onDeleteClick: () -> Unit,
+        modifier: Modifier = Modifier
+    ) {
+        Card(
+            onClick = onEditClick,
+            modifier = modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (imageUri != null) {
+                        AsyncImage(
+                            model = imageUri,
+                            contentDescription = name,
+                            modifier = Modifier.size(80.dp),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.Image,
+                            contentDescription = name,
+                            modifier = Modifier.size(80.dp),
+                            tint = Color.Gray
+                        )
                     }
-                } else {
-                    LazyVerticalGrid(
-                        columns = GridCells.Adaptive(minSize = 160.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        items(foodList) { item ->
-                            GridItem(
-                                makanan = item,
-                                onClick = {
-                                    navController.navigate(Screen.Detail.createRoute(item.id))
-                                }
-                            )
-                        }
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    Column {
+                        Text(
+                            text = name,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = keywords,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-                Button(
-                    onClick = {
-                        val shareText = foodList.joinToString("\n\n") { item ->
-                            buildString {
-                                append("🍽️ ${item.nama}\n")
-                                append("• Jenis: ${item.jenis}\n")
-                                append("• Rasa: ${item.rasa}\n")
-                                append("• Tingkat Pedas: ${item.tingkatPedas}\n")
-                                append("• Tekstur: ${item.tekstur}")
-                            }
-                        }
-
-                        val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                            type = "text/plain"
-                            putExtra(Intent.EXTRA_SUBJECT, subjectText)
-                            putExtra(Intent.EXTRA_TEXT, shareText)
-                        }
-
-                        context.startActivity(
-                            Intent.createChooser(shareIntent, subjectTextx)
-                        )
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = yellow,
-                        contentColor = Color.White
-                    ),
-                    shape = RoundedCornerShape(50),
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                        .fillMaxWidth()
+                Row(
+                    horizontalArrangement = Arrangement.End,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(text = stringResource(R.string.share_foodlist))
+                    TextButton(onClick = onEditClick) {
+                        Text(stringResource(R.string.edit))
+                    }
+                    TextButton(onClick = onDeleteClick) {
+                        Text(stringResource(R.string.tombol_hapus), color = Color.Red)
+                    }
                 }
             }
         }
     }
 
-    // DisplayAlertDialog untuk konfirmasi hapus
-    if (showDialog && selectedFoodItem != null) {
-        DisplayAlertDialog(
-            onDismissRequest = { showDialog = false },
-            onConfirmation = {
-                selectedFoodItem?.let {
-                    viewModel.deleteMakanan(it)
-                }
-                showDialog = false
-            }
-        )
-    }
-}
-
 
 @Composable
-fun FoodlistItem(
-    imageUri: Uri?,
-    name: String,
-    keywords: String,
+fun GridItem(
+    makanan: Makanan,
+    onClick: () -> Unit,
     onEditClick: () -> Unit,
-    onDeleteClick: () -> Unit,
-    modifier: Modifier = Modifier
+    onDeleteClick: () -> Unit
 ) {
     Card(
-        onClick = onEditClick,
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (imageUri != null) {
-                    AsyncImage(
-                        model = imageUri,
-                        contentDescription = name,
-                        modifier = Modifier.size(80.dp),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    Icon(
-                        imageVector = Icons.Default.Image,
-                        contentDescription = name,
-                        modifier = Modifier.size(80.dp),
-                        tint = Color.Gray
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                Column {
-                    Text(
-                        text = name,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = keywords,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(
-                horizontalArrangement = Arrangement.End,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                TextButton(onClick = onEditClick) {
-                    Text(stringResource(R.string.edit))
-                }
-                TextButton(onClick = onDeleteClick) {
-                    Text(stringResource(R.string.tombol_hapus), color = Color.Red)
-                }
-            }
-        }
-    }
-}
-
-
-@Composable
-fun GridItem(makanan: Makanan, onClick: () -> Unit) {
-    Card(
         modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() },
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-        ),
+            .fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
         border = BorderStroke(1.dp, DividerDefaults.color)
     ) {
         Column(
@@ -322,25 +332,29 @@ fun GridItem(makanan: Makanan, onClick: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (!makanan.imageUri.isNullOrBlank()) {
-                AsyncImage(
-                    model = Uri.parse(makanan.imageUri),
-                    contentDescription = makanan.nama,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(1f)
-                        .clip(RoundedCornerShape(8.dp))
-                )
-            } else {
-                Icon(
-                    imageVector = Icons.Default.Image,
-                    contentDescription = makanan.nama,
-                    modifier = Modifier
-                        .size(100.dp)
-                        .padding(8.dp),
-                    tint = Color.Gray
-                )
+            Box(modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onClick() }) {
+                if (!makanan.imageUri.isNullOrBlank()) {
+                    AsyncImage(
+                        model = Uri.parse(makanan.imageUri),
+                        contentDescription = makanan.nama,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(1f)
+                            .clip(RoundedCornerShape(8.dp))
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Image,
+                        contentDescription = makanan.nama,
+                        modifier = Modifier
+                            .size(100.dp)
+                            .padding(8.dp),
+                        tint = Color.Gray
+                    )
+                }
             }
 
             Text(
@@ -362,9 +376,22 @@ fun GridItem(makanan: Makanan, onClick: () -> Unit) {
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                TextButton(onClick = onEditClick) {
+                    Text(stringResource(R.string.edit))
+                }
+                TextButton(onClick = onDeleteClick) {
+                    Text(stringResource(R.string.tombol_hapus), color = Color.Red)
+                }
+            }
         }
     }
 }
+
 
 
 //@Preview(showBackground = true)
