@@ -15,12 +15,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -42,16 +39,12 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -59,111 +52,93 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.anandamartiza0128.makanapaya.R
 import com.anandamartiza0128.makanapaya.model.Makanan
-import com.anandamartiza0128.makanapaya.util.SettingsDataStore
+import com.anandamartiza0128.makanapaya.network.MakananApi
 import com.anandamartiza0128.makanapaya.viewmodel.MainViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import com.anandamartiza0128.makanapaya.viewmodel.MakananApiStatus
+import androidx.compose.foundation.layout.width
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FoodlistScreen(
+    modifier: Modifier = Modifier,
+    navController: NavHostController,
+    viewModel: MainViewModel
+) {
+    val statusApi by viewModel.status.collectAsState()
+    val makananListFromApi by viewModel.makananListFromApi.collectAsState()
+    val errorMessageApi by viewModel.errorMessage.collectAsState()
 
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    fun FoodlistScreen(
-        modifier: Modifier = Modifier,
-        navController: NavHostController,
-        viewModel: MainViewModel
-    ) {
-        val foodList by viewModel.makananList.collectAsState()
-        val context = LocalContext.current
-        val cerise = Color(ContextCompat.getColor(context, R.color.cerise))
-        val yellow = Color(ContextCompat.getColor(context, R.color.yellow))
-        val subjectText = stringResource(R.string.foodlist_title)
-        val subjectTextx = stringResource(R.string.share_foodlist_via)
-        val dataStore = SettingsDataStore(LocalContext.current)
-        val showList by dataStore.layoutFlow.collectAsState(true)
+    val context = LocalContext.current
+    val cerise = Color(ContextCompat.getColor(context, R.color.cerise))
+    val yellow = Color(ContextCompat.getColor(context, R.color.yellow))
+    val subjectText = stringResource(R.string.foodlist_title)
+    val subjectTextx = stringResource(R.string.share_foodlist_via)
 
-        var showDialog by remember { mutableStateOf(false) }
-        var selectedFoodItem by remember { mutableStateOf<Makanan?>(null) } // Item yang akan dihapus
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(text = stringResource(R.string.foodlist)) },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.icon_back),
+                            tint = Color.White
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.mediumTopAppBarColors(
+                    containerColor = cerise,
+                    titleContentColor = Color.White
+                ),
+                actions = {
+                    // Semua tombol aksi yang terkait dengan switch layout atau data lokal dihapus
+                }
+            )
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            when (statusApi) {
+                MakananApiStatus.LOADING -> {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        androidx.compose.material3.CircularProgressIndicator()
+                        Text(text = "Memuat data makanan dari internet...")
+                    }
+                }
 
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text(text = stringResource(R.string.foodlist)) },
-                    navigationIcon = {
-                        IconButton(onClick = { navController.popBackStack() }) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(R.string.icon_back),
-                                tint = Color.White
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.mediumTopAppBarColors(
-                        containerColor = cerise,
-                        titleContentColor = Color.White
-                    ),
-                    actions = {
-                        IconButton(onClick = {
-                            CoroutineScope(Dispatchers.IO).launch {
-                                dataStore.saveLayout(!showList)
-                            }
-                        }) {
-                            Icon(
-                                painter = painterResource(
-                                    if (showList) R.drawable.baseline_grid_view_24
-                                    else R.drawable.baseline_view_list_24
-                                ),
-                                contentDescription = stringResource(
-                                    if (showList) R.string.grid
-                                    else R.string.list
-                                ),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
+                MakananApiStatus.ERROR -> {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(text = errorMessageApi ?: "Terjadi kesalahan saat mengambil data.")
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(onClick = { viewModel.getMakananFromApi() }) {
+                            Text("Coba Lagi")
                         }
                     }
-                )
-            }
-        ) { innerPadding ->
-            Column(
-                modifier = modifier
-                    .padding(innerPadding)
-                    .fillMaxSize()
-                    .padding(16.dp)
-            ) {
-                if (foodList.isEmpty()) {
-                    Text(
-                        text = stringResource(R.string.no_food_added),
-                        modifier = Modifier.align(Alignment.CenterHorizontally),
-                        color = Color.Gray
-                    )
-                } else {
-                    if (showList) {
-                        LazyColumn(
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            items(foodList) { item ->
-                                val keywordGabungan = listOfNotNull(
-                                    item.jenis, item.rasa, item.tingkatPedas, item.tekstur
-                                ).joinToString(", ")
+                }
 
-                                FoodlistItem(
-                                    imageUri = item.imageUri.takeIf { it.isNotBlank() }?.let { Uri.parse(it) },
-                                    name = item.nama,
-                                    keywords = keywordGabungan,
-                                    onEditClick = {
-                                        navController.navigate(Screen.Detail.createRoute(item.id))
-                                    },
-                                    onDeleteClick = {
-                                        // Set food item yang akan dihapus
-                                        selectedFoodItem = item
-                                        showDialog = true
-                                    }
-                                )
-                            }
-                        }
+                MakananApiStatus.DONE -> {
+                    if (makananListFromApi.isEmpty()) {
+                        Text(
+                            text = "Tidak ada data makanan dari internet.",
+                            modifier = Modifier.align(Alignment.CenterHorizontally),
+                            color = Color.Gray
+                        )
                     } else {
                         LazyVerticalGrid(
                             columns = GridCells.Adaptive(minSize = 160.dp),
@@ -171,147 +146,182 @@ import kotlinx.coroutines.launch
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                             modifier = Modifier.weight(1f)
                         ) {
-                            items(foodList) { item ->
-                                GridItem(
-                                    makanan = item,
-                                    onClick = {
-                                        navController.navigate(Screen.Detail.createRoute(item.id))
-                                    },
-                                    onEditClick = {
-                                        navController.navigate(Screen.Detail.createRoute(item.id))
-                                    },
-                                    onDeleteClick = {
-                                        selectedFoodItem = item
-                                        showDialog = true
-                                    }
-                                )
+                            items(makananListFromApi) { item ->
+                                GridItemOnline(makanan = item)
                             }
                         }
                     }
+                }
+            }
 
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    Button(
-                        onClick = {
-                            val shareText = foodList.joinToString("\n\n") { item ->
-                                buildString {
-                                    append("🍽️ ${item.nama}\n")
-                                    append("• Jenis: ${item.jenis}\n")
-                                    append("• Rasa: ${item.rasa}\n")
-                                    append("• Tingkat Pedas: ${item.tingkatPedas}\n")
-                                    append("• Tekstur: ${item.tekstur}")
-                                }
+            if (makananListFromApi.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(24.dp))
+                Button(
+                    onClick = {
+                        val shareText = makananListFromApi.joinToString("\n\n") { item ->
+                            buildString {
+                                append("🍽️ ${item.nama}\n")
+                                append("• Jenis: ${item.jenis}\n")
+                                append("• Rasa: ${item.rasa}\n")
+                                append("• Tingkat Pedas: ${item.tingkatPedas}\n")
+                                append("• Tekstur: ${item.tekstur}")
                             }
+                        }
 
-                            val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                                type = "text/plain"
-                                putExtra(Intent.EXTRA_SUBJECT, subjectText)
-                                putExtra(Intent.EXTRA_TEXT, shareText)
-                            }
+                        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(Intent.EXTRA_SUBJECT, subjectText)
+                            putExtra(Intent.EXTRA_TEXT, shareText)
+                        }
 
-                            context.startActivity(
-                                Intent.createChooser(shareIntent, subjectTextx)
-                            )
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = yellow,
-                            contentColor = Color.White
-                        ),
-                        shape = RoundedCornerShape(50),
-                        modifier = Modifier
-                            .align(Alignment.CenterHorizontally)
-                            .fillMaxWidth()
-                    ) {
-                        Text(text = stringResource(R.string.share_foodlist))
-                    }
+                        context.startActivity(
+                            Intent.createChooser(shareIntent, subjectTextx)
+                        )
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = yellow,
+                        contentColor = Color.White
+                    ),
+                    shape = RoundedCornerShape(50),
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .fillMaxWidth()
+                ) {
+                    Text(text = stringResource(R.string.share_foodlist))
                 }
             }
         }
+    }
+} // <--- KURUNG KURAWAL PENUTUP FoodlistScreen BERAKHIR DI SINI
 
-        // DisplayAlertDialog untuk konfirmasi hapus
-        if (showDialog && selectedFoodItem != null) {
-            DisplayAlertDialog(
-                onDismissRequest = { showDialog = false },
-                onConfirmation = {
-                    selectedFoodItem?.let {
-                        viewModel.deleteMakanan(it)
-                    }
-                    showDialog = false
-                }
+// --- SEMUA COMPOSABLE LAINNYA HARUS DI LUAR FoodlistScreen ---
+
+@Composable
+fun GridItemOnline(
+    makanan: Makanan,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+        border = BorderStroke(1.dp, DividerDefaults.color)
+    ) {
+        Column(
+            modifier = Modifier.padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Box(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(MakananApi.getMakananImageUrl(makanan.imageUri))
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = makanan.nama,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(1f)
+                        .clip(RoundedCornerShape(8.dp))
+                )
+            }
+
+            Text(
+                text = makanan.nama,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            val keywordGabungan = listOfNotNull(
+                makanan.jenis, makanan.rasa, makanan.tingkatPedas, makanan.tekstur
+            ).joinToString(", ")
+
+            Text(
+                text = keywordGabungan,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }
+}
 
-
-    @Composable
-    fun FoodlistItem(
-        imageUri: Uri?,
-        name: String,
-        keywords: String,
-        onEditClick: () -> Unit,
-        onDeleteClick: () -> Unit,
-        modifier: Modifier = Modifier
+// FoodlistItem dan GridItem (Untuk data lokal) tetap dipertahankan di luar FoodlistScreen
+// jika masih digunakan di tempat lain. Jika tidak, kamu bisa menghapusnya.
+@Composable
+fun FoodlistItem(
+    imageUri: Uri?,
+    name: String,
+    keywords: String,
+    onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        onClick = onEditClick,
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Card(
-            onClick = onEditClick,
-            modifier = modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    if (imageUri != null) {
-                        AsyncImage(
-                            model = imageUri,
-                            contentDescription = name,
-                            modifier = Modifier.size(80.dp),
-                            contentScale = ContentScale.Crop
-                        )
-                    } else {
-                        Icon(
-                            imageVector = Icons.Default.Image,
-                            contentDescription = name,
-                            modifier = Modifier.size(80.dp),
-                            tint = Color.Gray
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(16.dp))
-
-                    Column {
-                        Text(
-                            text = name,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = keywords,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (imageUri != null) {
+                    AsyncImage(
+                        model = imageUri,
+                        contentDescription = name,
+                        modifier = Modifier.size(80.dp),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Image,
+                        contentDescription = name,
+                        modifier = Modifier.size(80.dp),
+                        tint = Color.Gray
+                    )
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.width(16.dp))
 
-                Row(
-                    horizontalArrangement = Arrangement.End,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    TextButton(onClick = onEditClick) {
-                        Text(stringResource(R.string.edit))
-                    }
-                    TextButton(onClick = onDeleteClick) {
-                        Text(stringResource(R.string.tombol_hapus), color = Color.Red)
-                    }
+                Column {
+                    Text(
+                        text = name,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = keywords,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                horizontalArrangement = Arrangement.End,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                TextButton(onClick = onEditClick) {
+                    Text(stringResource(R.string.edit))
+                }
+                TextButton(onClick = onDeleteClick) {
+                    Text(stringResource(R.string.tombol_hapus), color = Color.Red)
                 }
             }
         }
     }
+}
 
 
 @Composable
@@ -391,15 +401,3 @@ fun GridItem(
         }
     }
 }
-
-
-
-//@Preview(showBackground = true)
-//@Composable
-//fun FoodlistScreenPreview() {
-//    val navController = rememberNavController()
-//
-//    FoodlistScreen(navController = navController)
-//}
-
-

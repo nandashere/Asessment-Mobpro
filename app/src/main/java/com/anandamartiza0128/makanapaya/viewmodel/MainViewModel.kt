@@ -4,10 +4,18 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.anandamartiza0128.makanapaya.database.MakananDao
 import com.anandamartiza0128.makanapaya.model.Makanan
+import com.anandamartiza0128.makanapaya.network.MakananApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
+import java.io.IOException
+
+enum class MakananApiStatus { LOADING, ERROR, DONE }
 
 class MainViewModel(private val dao: MakananDao) : ViewModel() {
 
@@ -19,6 +27,23 @@ class MainViewModel(private val dao: MakananDao) : ViewModel() {
             initialValue = emptyList()
         )
 
+    // State untuk status pengambilan data dari API
+    private val _status = MutableStateFlow(MakananApiStatus.LOADING)
+    val status: StateFlow<MakananApiStatus> = _status.asStateFlow()
+
+    // State untuk data makanan yang diambil dari API
+    private val _makananListFromApi = MutableStateFlow<List<Makanan>>(emptyList())
+    val makananListFromApi: StateFlow<List<Makanan>> = _makananListFromApi.asStateFlow()
+
+    // State untuk pesan error
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+
+    init {
+        getMakananFromApi()
+    }
+
+
     // ✅ Tambahkan fungsi insert data ke database
     fun addMakanan(makanan: Makanan) {
         viewModelScope.launch {
@@ -29,6 +54,34 @@ class MainViewModel(private val dao: MakananDao) : ViewModel() {
     fun deleteMakanan(makanan: Makanan) {
         viewModelScope.launch {
             dao.delete(makanan)
+        }
+    }
+
+    fun getMakananFromApi() {
+        viewModelScope.launch(Dispatchers.IO) {
+            _status.value = MakananApiStatus.LOADING
+            _errorMessage.value = null
+
+            try {
+                _makananListFromApi.value = MakananApi.service.getMakananList()
+                _status.value = MakananApiStatus.DONE
+
+            } catch (e: IOException) {
+                _status.value = MakananApiStatus.ERROR
+                _errorMessage.value = "Koneksi internet bermasalah. Coba lagi nanti."
+                _makananListFromApi.value = emptyList()
+                e.printStackTrace()
+            } catch (e: HttpException) {
+                _status.value = MakananApiStatus.ERROR
+                _errorMessage.value = "Gagal mengambil data dari server. Kode Error: ${e.code()}"
+                _makananListFromApi.value = emptyList()
+                e.printStackTrace()
+            } catch (e: Exception) {
+                _status.value = MakananApiStatus.ERROR
+                _errorMessage.value = "Terjadi kesalahan tidak terduga: ${e.localizedMessage}"
+                _makananListFromApi.value = emptyList()
+                e.printStackTrace()
+            }
         }
     }
 
