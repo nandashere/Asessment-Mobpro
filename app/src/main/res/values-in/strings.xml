@@ -49,4 +49,5 @@
     <string name="pesan_hapus">Hapus Item Ini?</string>
     <string name="tombol_hapus">Hapus</string>
     <string name="tombol_batal">Batal</string>
+    <string name="profil">Profil</string>
 </resources>

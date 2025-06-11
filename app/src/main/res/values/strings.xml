@@ -93,4 +93,6 @@
     <string name="pesan_hapus">Delete this item?</string>
     <string name="tombol_hapus">Delete</string>
     <string name="tombol_batal">Cancel</string>
+
+    <string name="profil">Profile</string>
 </resources>
