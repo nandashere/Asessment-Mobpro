@@ -1,11 +1,13 @@
 package com.anandamartiza0128.makanapaya.network
 
 import com.anandamartiza0128.makanapaya.model.Makanan
+import com.anandamartiza0128.makanapaya.model.MakananApiResponse
 import com.squareup.moshi.Moshi
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import retrofit2.http.GET
+import retrofit2.http.Header
 
 private const val BASE_URL = "https://makanapaya.sendiko.my.id/"
 
@@ -20,7 +22,10 @@ private val retrofit = Retrofit.Builder()
 
 interface MakananApiService {
     @GET("api/makanans")
-    suspend fun getMakananList(  ): List<Makanan>
+    suspend fun getMakananList(
+        @Header("Authorization") authHeader: String,
+        @Header("user_id") userId: String
+    ): MakananApiResponse //
 }
 
 object MakananApi {

@@ -299,8 +299,9 @@ private suspend fun handleSignIn(result: GetCredentialResponse, dataStore: UserD
             val nama = googleId.displayName ?: ""
             val email = googleId.id
             val photoUrl = googleId.profilePictureUri.toString()
+            val idToken = googleId.idToken
 
-            dataStore.saveData(User(nama, email, photoUrl))
+            dataStore.saveData(User(nama, email, photoUrl, idToken))
 
         } catch (e: GoogleIdTokenParsingException) {
             Log.e("SIGN-IN", "Error: ${e.message}")

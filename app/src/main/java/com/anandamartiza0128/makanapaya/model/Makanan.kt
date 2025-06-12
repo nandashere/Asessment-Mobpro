@@ -14,3 +14,8 @@ data class Makanan(
     val tekstur: String = "",
     val imageUri: String = ""
 )
+
+data class MakananApiResponse(
+    val message: String? = null,
+    val data: List<Makanan>
+)
