@@ -75,6 +75,8 @@ dependencies {
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.googleid)
+    implementation(libs.androidx.datastore.preferences)
+    implementation("io.coil-kt:coil-compose:2.6.0")
 
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)

@@ -95,4 +95,6 @@
     <string name="tombol_batal">Cancel</string>
 
     <string name="profil">Profile</string>
+    <string name="tutup">Close</string>
+    <string name="logout">Log Out</string>
 </resources>

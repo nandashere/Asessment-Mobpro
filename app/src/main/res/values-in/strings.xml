@@ -50,4 +50,6 @@
     <string name="tombol_hapus">Hapus</string>
     <string name="tombol_batal">Batal</string>
     <string name="profil">Profil</string>
+    <string name="tutup">Tutup</string>
+    <string name="logout">Keluar</string>
 </resources>

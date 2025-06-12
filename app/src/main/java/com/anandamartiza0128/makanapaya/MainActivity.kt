@@ -64,9 +64,15 @@ import com.anandamartiza0128.makanapaya.viewmodel.ThemeViewModel
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import com.anandamartiza0128.makanapaya.network.UserDataStore
+import com.anandamartiza0128.makanapaya.model.User
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import androidx.credentials.ClearCredentialStateRequest
+import androidx.credentials.exceptions.ClearCredentialException
+import com.anandamartiza0128.makanapaya.navigation.ProfilDialog
 
 
 class MainActivity : ComponentActivity() {
@@ -100,6 +106,11 @@ fun MainScreen(navController: NavHostController) {
     val scope = rememberCoroutineScope()
     val isDarkTheme by settingsDataStore.themeFlow.collectAsState(initial = false)
 
+    val userDataStore = remember { UserDataStore(context) }
+    val user by userDataStore.userFlow.collectAsState(User())
+
+    var showDialog by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -118,13 +129,20 @@ fun MainScreen(navController: NavHostController) {
                             tint = Color.White
                         )
                     }
-                        IconButton(onClick = { CoroutineScope(Dispatchers.IO).launch { signIn(context) } }) {
-                            Icon(
-                                painter = painterResource(R.drawable.account_circle_24),
-                                contentDescription = stringResource(R.string.profil),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
+                    IconButton(onClick = { //
+                        if (user.email.isEmpty()) { //
+                            scope.launch { signIn(context, userDataStore) } // Panggil signIn dengan dataStore
+                        } else {
+                            Log.d("SIGN-IN", "User: $user") //
+                            showDialog = true //
                         }
+                    }) {
+                        Icon(
+                            painter = painterResource(R.drawable.account_circle_24),
+                            contentDescription = stringResource(R.string.profil),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 },
                 colors = TopAppBarDefaults.mediumTopAppBarColors(
                     containerColor = ceriseColor,
@@ -137,6 +155,17 @@ fun MainScreen(navController: NavHostController) {
             modifier = Modifier.padding(innerPadding),
             navController = navController
         )
+
+        if (showDialog) { //
+            ProfilDialog( //
+                user = user, //
+                onDismissRequest = { showDialog = false }, //
+                onConfirmation = { // Ini akan digunakan untuk logout di kemudian hari
+                    scope.launch { signOut(context, userDataStore) } // Panggil signOut
+                    showDialog = false //
+                }
+            )
+        }
     }
 }
 
@@ -240,7 +269,7 @@ fun MainScreenPreview() {
     }
 }
 
-private suspend fun signIn(context: Context) {
+private suspend fun signIn(context: Context, dataStore: UserDataStore) {
     val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
         .setFilterByAuthorizedAccounts(false)
         .setServerClientId(BuildConfig.API_KEY)
@@ -253,24 +282,43 @@ private suspend fun signIn(context: Context) {
     try {
         val credentialManager = CredentialManager.create(context)
         val result = credentialManager.getCredential(context, request)
-        handleSignIn(result)
+        handleSignIn(result, dataStore)
     } catch (e: GetCredentialException) {
         Log.e("SIGN-IN", "Error: ${e.errorMessage}")
     }
 }
 
-private fun handleSignIn(result: GetCredentialResponse) {
+private suspend fun handleSignIn(result: GetCredentialResponse, dataStore: UserDataStore) {
     val credential = result.credential
     if (credential is CustomCredential &&
         credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
         try {
             val googleId = GoogleIdTokenCredential.createFrom(credential.data)
             Log.d("SIGN-IN", "User email: ${googleId.id}")
+
+            val nama = googleId.displayName ?: ""
+            val email = googleId.id
+            val photoUrl = googleId.profilePictureUri.toString()
+
+            dataStore.saveData(User(nama, email, photoUrl))
+
         } catch (e: GoogleIdTokenParsingException) {
             Log.e("SIGN-IN", "Error: ${e.message}")
         }
     }
     else {
         Log.e("SIGN-IN", "Error: unrecognized custom credential type.")
+    }
+}
+
+private suspend fun signOut(context: Context, dataStore: UserDataStore) { //
+    try {
+        val credentialManager = CredentialManager.create(context)
+        credentialManager.clearCredentialState(
+            ClearCredentialStateRequest()
+        )
+        dataStore.saveData(User())
+    } catch (e: ClearCredentialException) {
+        Log.e("SIGN-IN", "Error: ${e.errorMessage}")
     }
 }
