@@ -8,11 +8,17 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import okhttp3.ResponseBody
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
+import retrofit2.http.Path
+import retrofit2.Response
+import retrofit2.http.Body
+import retrofit2.http.PUT
 
 private const val BASE_URL = "https://makanapaya.sendiko.my.id/"
 
@@ -44,6 +50,27 @@ interface MakananApiService {
         @Part("tekstur") tekstur: RequestBody,
         @Part image: MultipartBody.Part?
     ): Makanan
+
+    @DELETE("api/makanans/{id}")
+    suspend fun deleteMakanan(
+        @Path("id") id: Int,
+        @Header("Authorization") authHeader: String,
+        @Header("user_id") userId: String
+    ): Response<ResponseBody>
+
+    @Multipart
+    @PUT("api/makanans/{id}")
+    suspend fun updateMakanan(
+        @Path("id") id: Int,
+        @Header("Authorization") authHeader: String,
+        @Header("user_id") userId: String,
+        @Part("nama") nama: RequestBody,
+        @Part("jenis") jenis: RequestBody,
+        @Part("rasa") rasa: RequestBody,
+        @Part("tingkatPedas") tingkatPedas: RequestBody,
+        @Part("tekstur") tekstur: RequestBody,
+        @Part image: MultipartBody.Part?
+    ): Response<Makanan>
 }
 
 object MakananApi {

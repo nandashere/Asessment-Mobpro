@@ -59,6 +59,12 @@ import com.anandamartiza0128.makanapaya.network.MakananApi
 import com.anandamartiza0128.makanapaya.viewmodel.MainViewModel
 import com.anandamartiza0128.makanapaya.viewmodel.MakananApiStatus
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.material3.CircularProgressIndicator
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -76,6 +82,9 @@ fun FoodlistScreen(
     val yellow = Color(ContextCompat.getColor(context, R.color.yellow))
     val subjectText = stringResource(R.string.foodlist_title)
     val subjectTextx = stringResource(R.string.share_foodlist_via)
+
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var makananToDelete by remember { mutableStateOf<Makanan?>(null) }
 
     Scaffold(
         topBar = {
@@ -113,7 +122,7 @@ fun FoodlistScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
-                        androidx.compose.material3.CircularProgressIndicator()
+                        CircularProgressIndicator()
                         Text(text = "Memuat data makanan dari internet...")
                     }
                 }
@@ -147,7 +156,17 @@ fun FoodlistScreen(
                             modifier = Modifier.weight(1f)
                         ) {
                             items(makananListFromApi) { item ->
-                                GridItemOnline(makanan = item)
+                                GridItemOnline(
+                                    makanan = item,
+                                    onEditClick = {
+                                        // Navigasi ke DetailScreen untuk mengedit
+                                        navController.navigate(Screen.Detail.createRoute(item.id))
+                                    },
+                                    onDeleteClick = {
+                                        makananToDelete = item // Simpan makanan yang akan dihapus
+                                        showDeleteDialog = true // Tampilkan dialog konfirmasi
+                                    }
+                                )
                             }
                         }
                     }
@@ -192,6 +211,23 @@ fun FoodlistScreen(
             }
         }
     }
+
+    // Dialog konfirmasi hapus
+    if (showDeleteDialog) {
+        DisplayAlertDialog(
+            onDismissRequest = {
+                showDeleteDialog = false
+                makananToDelete = null // Hapus referensi
+            },
+            onConfirmation = {
+                makananToDelete?.let {
+                    viewModel.deleteMakananFromApi(it.id)
+                }
+                showDeleteDialog = false
+                makananToDelete = null
+            }
+        )
+    }
 } // <--- KURUNG KURAWAL PENUTUP FoodlistScreen BERAKHIR DI SINI
 
 // --- SEMUA COMPOSABLE LAINNYA HARUS DI LUAR FoodlistScreen ---
@@ -199,7 +235,9 @@ fun FoodlistScreen(
 @Composable
 fun GridItemOnline(
     makanan: Makanan,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onEditClick: () -> Unit,    // Tambahkan parameter untuk aksi edit
+    onDeleteClick: () -> Unit   // Tambahkan parameter untuk aksi hapus
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -212,7 +250,10 @@ fun GridItemOnline(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    // Menambahkan clickable ke Box agar seluruh item bisa di-klik untuk edit
+                    .clickable { onEditClick() }
             ) {
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
@@ -247,6 +288,23 @@ fun GridItemOnline(
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
+
+            // Baris tombol Edit dan Delete
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                TextButton(onClick = onEditClick) {
+                    Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit")
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(stringResource(R.string.edit))
+                }
+                TextButton(onClick = onDeleteClick) {
+                    Icon(imageVector = Icons.Default.Delete, contentDescription = "Hapus", tint = Color.Red)
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(stringResource(R.string.tombol_hapus), color = Color.Red)
+                }
+            }
         }
     }
 }

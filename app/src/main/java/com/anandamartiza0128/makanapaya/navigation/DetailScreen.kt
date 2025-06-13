@@ -1,5 +1,7 @@
 package com.anandamartiza0128.makanapaya.navigation
 
+import android.content.Context
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -29,20 +31,31 @@ import coil.compose.rememberAsyncImagePainter
 import com.anandamartiza0128.makanapaya.R
 import com.anandamartiza0128.makanapaya.components.DropDownField
 import com.anandamartiza0128.makanapaya.model.FoodConstants
+import com.anandamartiza0128.makanapaya.model.Makanan
+import com.anandamartiza0128.makanapaya.network.MakananApi
 import com.anandamartiza0128.makanapaya.util.ViewModelFactory
-import com.anandamartiza0128.makanapaya.viewmodel.DetailViewModel
+import com.anandamartiza0128.makanapaya.util.copyUriToInternalStorage // Import fungsi ini jika diperlukan
+import com.anandamartiza0128.makanapaya.viewmodel.MainViewModel
+import java.io.File // Import File jika digunakan untuk image upload
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailScreen(
     id: Int,
     navController: NavController,
-    viewModel: DetailViewModel = viewModel(factory = ViewModelFactory(LocalContext.current))
+    // Gunakan MainViewModel di sini
+    viewModel: MainViewModel = viewModel(factory = ViewModelFactory(LocalContext.current))
 ) {
-    val makanan by viewModel.uiState.collectAsState()
     val context = LocalContext.current
     val ceriseColor = Color(ContextCompat.getColor(context, R.color.cerise))
     val yellowColor = Color(ContextCompat.getColor(context, R.color.yellow))
+
+    // Ambil daftar makanan dari API. Kita akan mencari makanan yang sesuai dengan ID dari daftar ini.
+    val makananListFromApi by viewModel.makananListFromApi.collectAsState()
+
+    // State lokal untuk form makanan yang akan diedit/ditampilkan.
+    // Inisialisasi dengan Makanan kosong atau Makanan yang ditemukan.
+    var currentMakananFormState by remember { mutableStateOf(Makanan()) }
 
     var expandedJenis by remember { mutableStateOf(false) }
     var expandedRasa by remember { mutableStateOf(false) }
@@ -54,22 +67,42 @@ fun DetailScreen(
     val listPedas = FoodConstants.getListPedas(context)
     val listTekstur = FoodConstants.getListTekstur(context)
 
+    // State untuk menyimpan file gambar yang dipilih (jika ada perubahan)
+    var selectedImageFileForUpload: File? by remember { mutableStateOf(null) }
+
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri ->
-            viewModel.updateField(
-                nama = makanan.nama,
-                jenis = makanan.jenis,
-                rasa = makanan.rasa,
-                tingkatPedas = makanan.tingkatPedas,
-                tekstur = makanan.tekstur,
-                imageUri = uri?.toString() ?: ""
-            )
+            if (uri != null) {
+                // Saat gambar baru dipilih, simpan URI lokalnya untuk preview.
+                // Jika kamu ingin mengupload gambar ini ke server, kamu perlu
+                // menyimpannya sebagai File dan mengirimkannya dalam Multipart request
+                // saat tombol "Simpan" diklik.
+                val copiedPath = copyUriToInternalStorage(
+                    context,
+                    uri,
+                    "img_edit_${currentMakananFormState.id}_${System.currentTimeMillis()}.jpg"
+                )
+                currentMakananFormState = currentMakananFormState.copy(imageUri = copiedPath)
+                selectedImageFileForUpload = File(copiedPath) // Simpan file untuk diupload nanti
+            }
         }
     )
 
-    LaunchedEffect(id) {
-        viewModel.loadMakananById(id.toLong())
+    // LaunchedEffect untuk memuat data makanan saat ID berubah atau data API tersedia
+    LaunchedEffect(id, makananListFromApi) {
+        if (id != 0) {
+            val foundMakanan = makananListFromApi.find { it.id == id }
+            currentMakananFormState = foundMakanan ?: Makanan()
+            // Set selectedImageFileForUpload ke null setiap kali makanan baru dimuat
+            // agar tidak mengirim gambar lama secara tidak sengaja
+            selectedImageFileForUpload = null
+        } else {
+            // Ini mungkin tidak relevan jika DetailScreen hanya untuk edit
+            // Jika untuk "Tambah Makanan" juga, harus disesuaikan rutenya.
+            currentMakananFormState = Makanan()
+            selectedImageFileForUpload = null
+        }
     }
 
     Scaffold(
@@ -113,9 +146,23 @@ fun DetailScreen(
                     .background(Color.LightGray),
                 contentAlignment = Alignment.Center
             ) {
-                if (makanan.imageUri.isNotBlank()) {
+                if (currentMakananFormState.imageUri.isNotBlank()) {
+                    // Cek apakah imageUri adalah URL lengkap (dari server) atau path lokal
+                    val imageUrl = if (currentMakananFormState.imageUri.startsWith("http")) {
+                        currentMakananFormState.imageUri
+                    } else {
+                        // Jika bukan URL lengkap, asumsikan itu adalah path relatif dari server
+                        // atau path lokal yang disimpan.
+                        // Jika ini adalah path lokal yang di-copy, tampilkan langsung dari File.
+                        // Jika ini adalah path relatif dari server (misal: "makanan_images/file.jpg"),
+                        // maka gunakan MakananApi.getMakananImageUrl().
+                        // Kamu perlu memastikan logika ini sesuai dengan bagaimana imageUri disimpan
+                        // setelah diambil dari API.
+                        MakananApi.getMakananImageUrl(currentMakananFormState.imageUri)
+                    }
+
                     Image(
-                        painter = rememberAsyncImagePainter(makanan.imageUri),
+                        painter = rememberAsyncImagePainter(imageUrl),
                         contentDescription = null,
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
@@ -141,33 +188,19 @@ fun DetailScreen(
             // Form Field Nama Makanan
             FormField(
                 label = stringResource(R.string.nama_makanan),
-                value = makanan.nama,
+                value = currentMakananFormState.nama,
                 onValueChange = {
-                    viewModel.updateField(
-                        nama = it,
-                        jenis = makanan.jenis,
-                        rasa = makanan.rasa,
-                        tingkatPedas = makanan.tingkatPedas,
-                        tekstur = makanan.tekstur,
-                        imageUri = makanan.imageUri
-                    )
+                    currentMakananFormState = currentMakananFormState.copy(nama = it)
                 }
             )
 
             DropDownField(
                 label = stringResource(R.string.jenis_makanan),
-                value = makanan.jenis,
+                value = currentMakananFormState.jenis,
                 expanded = expandedJenis,
                 onExpandedChange = { expandedJenis = it },
                 onItemSelected = {
-                    viewModel.updateField(
-                        nama = makanan.nama,
-                        jenis = it,
-                        rasa = makanan.rasa,
-                        tingkatPedas = makanan.tingkatPedas,
-                        tekstur = makanan.tekstur,
-                        imageUri = makanan.imageUri
-                    )
+                    currentMakananFormState = currentMakananFormState.copy(jenis = it)
                     expandedJenis = false
                 },
                 items = listJenis
@@ -175,18 +208,11 @@ fun DetailScreen(
 
             DropDownField(
                 label = stringResource(R.string.rasa_makanan),
-                value = makanan.rasa,
+                value = currentMakananFormState.rasa,
                 expanded = expandedRasa,
                 onExpandedChange = { expandedRasa = it },
                 onItemSelected = {
-                    viewModel.updateField(
-                        nama = makanan.nama,
-                        jenis = makanan.jenis,
-                        rasa = it,
-                        tingkatPedas = makanan.tingkatPedas,
-                        tekstur = makanan.tekstur,
-                        imageUri = makanan.imageUri
-                    )
+                    currentMakananFormState = currentMakananFormState.copy(rasa = it)
                     expandedRasa = false
                 },
                 items = listRasa
@@ -194,18 +220,11 @@ fun DetailScreen(
 
             DropDownField(
                 label = stringResource(R.string.tingkat_kepedasan),
-                value = makanan.tingkatPedas,
+                value = currentMakananFormState.tingkatPedas,
                 expanded = expandedPedas,
                 onExpandedChange = { expandedPedas = it },
                 onItemSelected = {
-                    viewModel.updateField(
-                        nama = makanan.nama,
-                        jenis = makanan.jenis,
-                        rasa = makanan.rasa,
-                        tingkatPedas = it,
-                        tekstur = makanan.tekstur,
-                        imageUri = makanan.imageUri
-                    )
+                    currentMakananFormState = currentMakananFormState.copy(tingkatPedas = it)
                     expandedPedas = false
                 },
                 items = listPedas
@@ -213,18 +232,11 @@ fun DetailScreen(
 
             DropDownField(
                 label = stringResource(R.string.tekstur_makanan),
-                value = makanan.tekstur,
+                value = currentMakananFormState.tekstur,
                 expanded = expandedTekstur,
                 onExpandedChange = { expandedTekstur = it },
                 onItemSelected = {
-                    viewModel.updateField(
-                        nama = makanan.nama,
-                        jenis = makanan.jenis,
-                        rasa = makanan.rasa,
-                        tingkatPedas = makanan.tingkatPedas,
-                        tekstur = it,
-                        imageUri = makanan.imageUri
-                    )
+                    currentMakananFormState = currentMakananFormState.copy(tekstur = it)
                     expandedTekstur = false
                 },
                 items = listTekstur
@@ -234,7 +246,12 @@ fun DetailScreen(
 
             Button(
                 onClick = {
-                    viewModel.saveMakanan()
+                    // Panggil fungsi updateMakananInApi dari MainViewModel
+                    // Jika ada gambar baru yang dipilih, kamu juga perlu mengirimnya.
+                    // Saat ini, updateMakananInApi tidak menangani file gambar, hanya data Makanan.
+                    // Kamu perlu menambahkan parameter File? imageFile di updateMakananInApi
+                    // jika kamu ingin mengizinkan perubahan gambar saat update.
+                    viewModel.updateMakananInApi(currentMakananFormState)
                     navController.popBackStack()
                 },
                 modifier = Modifier.fillMaxWidth(),

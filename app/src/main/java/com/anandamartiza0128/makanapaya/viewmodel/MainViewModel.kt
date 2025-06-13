@@ -1,8 +1,5 @@
 package com.anandamartiza0128.makanapaya.viewmodel
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -24,7 +21,6 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
-import java.io.ByteArrayOutputStream
 import java.io.File
 
 enum class MakananApiStatus { LOADING, ERROR, DONE }
@@ -66,11 +62,10 @@ class MainViewModel(
         }
     }
 
-    // Fungsi untuk menambahkan data ke server
     fun addMakananToApi(makanan: Makanan, imageFile: File?) {
         viewModelScope.launch(Dispatchers.IO) {
-            _status.value = MakananApiStatus.LOADING // Set status menjadi loading
-            _errorMessage.value = null // Bersihkan kesalahan sebelumnya
+            _status.value = MakananApiStatus.LOADING
+            _errorMessage.value = null
 
             try {
                 val user = userDataStore.userFlow.first()
@@ -101,10 +96,10 @@ class MainViewModel(
                     rasaPart,
                     tingkatPedasPart,
                     teksturPart,
-                    imageMultipart // Teruskan gambar multipart
+                    imageMultipart
                 )
 
-                getMakananFromApi() // Ambil ulang untuk memperbarui daftar dengan item baru
+                getMakananFromApi()
                 _status.value = MakananApiStatus.DONE
 
             } catch (e: IOException) {
@@ -128,9 +123,108 @@ class MainViewModel(
         }
     }
 
-    fun deleteMakanan(makanan: Makanan) {
-        viewModelScope.launch {
-            dao.delete(makanan)
+    fun deleteMakananFromApi(makananId: Int) { // Mengganti nama parameter dari 'id' menjadi 'makananId' untuk kejelasan
+        viewModelScope.launch(Dispatchers.IO) {
+            _status.value = MakananApiStatus.LOADING
+            _errorMessage.value = null
+
+            try {
+                val user = userDataStore.userFlow.first()
+                val idToken = user.idToken
+                val authHeader = "Bearer $idToken"
+                val userIdValue = user.email
+
+                val response = MakananApi.service.deleteMakanan(makananId, authHeader, userIdValue) // Menggunakan makananId di sini
+                if (response.isSuccessful) {
+                    Log.d("Delete", "Makanan deleted successfully")
+                    getMakananFromApi() // Refresh list setelah hapus
+                } else {
+                    Log.e("Delete", "Error deleting makanan: ${response.code()}")
+                    val errorBody = response.errorBody()?.string()
+                    _errorMessage.value = "Gagal menghapus data. Kode Error: ${response.code()}. Detail: ${errorBody ?: "Tidak ada detail error."}"
+                }
+                _status.value = MakananApiStatus.DONE
+            } catch (e: IOException) {
+                _status.value = MakananApiStatus.ERROR
+                _errorMessage.value = "Koneksi internet bermasalah. Coba lagi nanti."
+                Log.e("API_ERROR", "IOException (Delete): ${e.message}", e)
+            } catch (e: HttpException) {
+                _status.value = MakananApiStatus.ERROR
+                val errorBody = e.response()?.errorBody()?.string()
+                Log.e("API_ERROR", "HTTP Exception (Delete): ${e.code()}, Message: ${e.message()}, Body Error: $errorBody", e)
+                if (e.code() == 401 || e.code() == 403) {
+                    _errorMessage.value = "Akses ditolak. Silakan login kembali."
+                } else {
+                    _errorMessage.value = "Gagal menghapus data di server. Kode Error: ${e.code()}. Detail: ${errorBody ?: "Tidak ada detail error."}"
+                }
+            } catch (e: Exception) {
+                _status.value = MakananApiStatus.ERROR
+                _errorMessage.value = "Terjadi kesalahan tidak terduga: ${e.localizedMessage}"
+                Log.e("API_ERROR", "Pengecualian Umum (Delete): ${e.message}", e)
+            }
+        }
+    }
+
+    fun updateMakananInApi(makanan: Makanan, imageFile: File? = null) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _status.value = MakananApiStatus.LOADING
+            _errorMessage.value = null
+
+            try {
+                val user = userDataStore.userFlow.first()
+                val idToken = user.idToken
+                val authHeader = "Bearer $idToken"
+                val userIdValue = user.email
+
+                Log.d("API_DEBUG", "Mengirim Header Authorization: '$authHeader'")
+                Log.d("API_DEBUG", "Mengirim Header user_id: '$userIdValue'")
+
+                val namaPart = makanan.nama.toRequestBody("text/plain".toMediaTypeOrNull())
+                val jenisPart = makanan.jenis.toRequestBody("text/plain".toMediaTypeOrNull())
+                val rasaPart = makanan.rasa.toRequestBody("text/plain".toMediaTypeOrNull())
+                val tingkatPedasPart = makanan.tingkatPedas.toRequestBody("text/plain".toMediaTypeOrNull())
+                val teksturPart = makanan.tekstur.toRequestBody("text/plain".toMediaTypeOrNull())
+
+                var imageMultipart: MultipartBody.Part? = null
+                if (imageFile != null) {
+                    val requestBody = imageFile.asRequestBody("image/*".toMediaTypeOrNull())
+                    imageMultipart = MultipartBody.Part.createFormData("image", imageFile.name, requestBody)
+                }
+
+                // Panggil fungsi updateMakanan dari MakananApi.service
+                val result = MakananApi.service.updateMakanan(
+                    makanan.id, // ID makanan yang akan diupdate
+                    authHeader,
+                    userIdValue,
+                    namaPart,
+                    jenisPart,
+                    rasaPart,
+                    tingkatPedasPart,
+                    teksturPart,
+                    imageMultipart // Teruskan gambar multipart (bisa null)
+                )
+
+                getMakananFromApi() // Ambil ulang untuk memperbarui daftar dengan item baru
+                _status.value = MakananApiStatus.DONE
+
+            } catch (e: IOException) {
+                _status.value = MakananApiStatus.ERROR
+                _errorMessage.value = "Koneksi internet bermasalah. Gagal mengupdate data."
+                Log.e("API_ERROR", "IOException (Update): ${e.message}", e)
+            } catch (e: HttpException) {
+                _status.value = MakananApiStatus.ERROR
+                val errorBody = e.response()?.errorBody()?.string()
+                Log.e("API_ERROR", "HTTP Exception (Update): ${e.code()}, Message: ${e.message()}, Body Error: $errorBody", e)
+                if (e.code() == 401 || e.code() == 403) {
+                    _errorMessage.value = "Akses ditolak. Silakan login kembali."
+                } else {
+                    _errorMessage.value = "Gagal mengupdate data di server. Kode Error: ${e.code()}. Detail: ${errorBody ?: "Tidak ada detail error."}"
+                }
+            } catch (e: Exception) {
+                _status.value = MakananApiStatus.ERROR
+                _errorMessage.value = "Terjadi kesalahan tidak terduga saat mengupdate: ${e.localizedMessage}"
+                Log.e("API_ERROR", "Pengecualian Umum (Update): ${e.message}", e)
+            }
         }
     }
 
@@ -150,9 +244,8 @@ class MainViewModel(
                 Log.d("API_DEBUG", "Mengirim Header Authorization: '$authHeader'")
                 Log.d("API_DEBUG", "Mengirim Header user_id: '$userIdValue'")
 
-                // Panggil API
                 val response = MakananApi.service.getMakananList(authHeader, userIdValue)
-                _makananListFromApi.value = response.data // <-- AMBIL DARI PROPERTI 'data'
+                _makananListFromApi.value = response.data
                 _status.value = MakananApiStatus.DONE
 
             } catch (e: IOException) {
@@ -167,7 +260,6 @@ class MainViewModel(
                 if (e.code() == 401 || e.code() == 403) {
                     _errorMessage.value = "Akses ditolak. Silakan login kembali."
                 } else {
-                    // Bisa juga cek errorBody untuk pesan spesifik dari server
                     _errorMessage.value = "Gagal mengambil data dari server. Kode Error: ${e.code()}. Detail: ${errorBody ?: "Tidak ada detail error."}"
                 }
                 _makananListFromApi.value = emptyList()
