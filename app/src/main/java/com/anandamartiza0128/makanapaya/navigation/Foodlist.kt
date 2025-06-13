@@ -15,17 +15,21 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -39,6 +43,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -55,16 +62,8 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.anandamartiza0128.makanapaya.R
 import com.anandamartiza0128.makanapaya.model.Makanan
-import com.anandamartiza0128.makanapaya.network.MakananApi
 import com.anandamartiza0128.makanapaya.viewmodel.MainViewModel
 import com.anandamartiza0128.makanapaya.viewmodel.MakananApiStatus
-import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.material3.CircularProgressIndicator
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,6 +82,7 @@ fun FoodlistScreen(
     val subjectText = stringResource(R.string.foodlist_title)
     val subjectTextx = stringResource(R.string.share_foodlist_via)
 
+    // State untuk dialog konfirmasi hapus
     var showDeleteDialog by remember { mutableStateOf(false) }
     var makananToDelete by remember { mutableStateOf<Makanan?>(null) }
 
@@ -102,10 +102,7 @@ fun FoodlistScreen(
                 colors = TopAppBarDefaults.mediumTopAppBarColors(
                     containerColor = cerise,
                     titleContentColor = Color.White
-                ),
-                actions = {
-                    // Semua tombol aksi yang terkait dengan switch layout atau data lokal dihapus
-                }
+                )
             )
         }
     ) { innerPadding ->
@@ -122,7 +119,7 @@ fun FoodlistScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
-                        CircularProgressIndicator()
+                        CircularProgressIndicator() // Menggunakan CircularProgressIndicator dari material3
                         Text(text = "Memuat data makanan dari internet...")
                     }
                 }
@@ -228,9 +225,7 @@ fun FoodlistScreen(
             }
         )
     }
-} // <--- KURUNG KURAWAL PENUTUP FoodlistScreen BERAKHIR DI SINI
-
-// --- SEMUA COMPOSABLE LAINNYA HARUS DI LUAR FoodlistScreen ---
+}
 
 @Composable
 fun GridItemOnline(
@@ -255,18 +250,31 @@ fun GridItemOnline(
                     // Menambahkan clickable ke Box agar seluruh item bisa di-klik untuk edit
                     .clickable { onEditClick() }
             ) {
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(MakananApi.getMakananImageUrl(makanan.imageUri))
-                        .crossfade(true)
-                        .build(),
-                    contentDescription = makanan.nama,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(1f)
-                        .clip(RoundedCornerShape(8.dp))
-                )
+                // Periksa apakah imageUri tidak null atau kosong sebelum menampilkan
+                if (!makanan.imageUri.isNullOrBlank()) {
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(makanan.imageUri) // <--- Langsung gunakan imageUri yang sudah jadi URL
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = makanan.nama,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(1f)
+                            .clip(RoundedCornerShape(8.dp))
+                    )
+                } else {
+                    // Tampilkan placeholder jika tidak ada gambar
+                    Icon(
+                        imageVector = Icons.Default.Image,
+                        contentDescription = makanan.nama,
+                        modifier = Modifier
+                            .size(100.dp)
+                            .padding(8.dp),
+                        tint = Color.Gray
+                    )
+                }
             }
 
             Text(
@@ -309,8 +317,6 @@ fun GridItemOnline(
     }
 }
 
-// FoodlistItem dan GridItem (Untuk data lokal) tetap dipertahankan di luar FoodlistScreen
-// jika masih digunakan di tempat lain. Jika tidak, kamu bisa menghapusnya.
 @Composable
 fun FoodlistItem(
     imageUri: Uri?,
@@ -369,85 +375,6 @@ fun FoodlistItem(
             Row(
                 horizontalArrangement = Arrangement.End,
                 modifier = Modifier.fillMaxWidth()
-            ) {
-                TextButton(onClick = onEditClick) {
-                    Text(stringResource(R.string.edit))
-                }
-                TextButton(onClick = onDeleteClick) {
-                    Text(stringResource(R.string.tombol_hapus), color = Color.Red)
-                }
-            }
-        }
-    }
-}
-
-
-@Composable
-fun GridItem(
-    makanan: Makanan,
-    onClick: () -> Unit,
-    onEditClick: () -> Unit,
-    onDeleteClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-        border = BorderStroke(1.dp, DividerDefaults.color)
-    ) {
-        Column(
-            modifier = Modifier.padding(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Box(modifier = Modifier
-                .fillMaxWidth()
-                .clickable { onClick() }) {
-                if (!makanan.imageUri.isNullOrBlank()) {
-                    AsyncImage(
-                        model = Uri.parse(makanan.imageUri),
-                        contentDescription = makanan.nama,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(1f)
-                            .clip(RoundedCornerShape(8.dp))
-                    )
-                } else {
-                    Icon(
-                        imageVector = Icons.Default.Image,
-                        contentDescription = makanan.nama,
-                        modifier = Modifier
-                            .size(100.dp)
-                            .padding(8.dp),
-                        tint = Color.Gray
-                    )
-                }
-            }
-
-            Text(
-                text = makanan.nama,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Bold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            val keywordGabungan = listOfNotNull(
-                makanan.jenis, makanan.rasa, makanan.tingkatPedas, makanan.tekstur
-            ).joinToString(", ")
-
-            Text(
-                text = keywordGabungan,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 TextButton(onClick = onEditClick) {
                     Text(stringResource(R.string.edit))

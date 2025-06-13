@@ -1,6 +1,5 @@
 package com.anandamartiza0128.makanapaya.navigation
 
-import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -32,11 +31,10 @@ import com.anandamartiza0128.makanapaya.R
 import com.anandamartiza0128.makanapaya.components.DropDownField
 import com.anandamartiza0128.makanapaya.model.FoodConstants
 import com.anandamartiza0128.makanapaya.model.Makanan
-import com.anandamartiza0128.makanapaya.network.MakananApi
 import com.anandamartiza0128.makanapaya.util.ViewModelFactory
-import com.anandamartiza0128.makanapaya.util.copyUriToInternalStorage // Import fungsi ini jika diperlukan
+import com.anandamartiza0128.makanapaya.util.copyUriToInternalStorage
 import com.anandamartiza0128.makanapaya.viewmodel.MainViewModel
-import java.io.File // Import File jika digunakan untuk image upload
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -146,23 +144,19 @@ fun DetailScreen(
                     .background(Color.LightGray),
                 contentAlignment = Alignment.Center
             ) {
-                if (currentMakananFormState.imageUri.isNotBlank()) {
-                    // Cek apakah imageUri adalah URL lengkap (dari server) atau path lokal
-                    val imageUrl = if (currentMakananFormState.imageUri.startsWith("http")) {
-                        currentMakananFormState.imageUri
-                    } else {
-                        // Jika bukan URL lengkap, asumsikan itu adalah path relatif dari server
-                        // atau path lokal yang disimpan.
-                        // Jika ini adalah path lokal yang di-copy, tampilkan langsung dari File.
-                        // Jika ini adalah path relatif dari server (misal: "makanan_images/file.jpg"),
-                        // maka gunakan MakananApi.getMakananImageUrl().
-                        // Kamu perlu memastikan logika ini sesuai dengan bagaimana imageUri disimpan
-                        // setelah diambil dari API.
-                        MakananApi.getMakananImageUrl(currentMakananFormState.imageUri)
-                    }
+                // Cek apakah ada URI gambar. Jika ada, tampilkan.
+                // prioritized (selectedImageFileForUpload != null) if user just selected a new image
+                val imageToDisplay = if (selectedImageFileForUpload != null) {
+                    Uri.fromFile(selectedImageFileForUpload) // If a new image is selected, display it
+                } else if (!currentMakananFormState.imageUri.isNullOrBlank()) {
+                    Uri.parse(currentMakananFormState.imageUri) // Otherwise, display the existing image from server URL
+                } else {
+                    null // No image to display
+                }
 
+                if (imageToDisplay != null) {
                     Image(
-                        painter = rememberAsyncImagePainter(imageUrl),
+                        painter = rememberAsyncImagePainter(imageToDisplay),
                         contentDescription = null,
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop

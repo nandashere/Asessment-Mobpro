@@ -30,7 +30,6 @@ class MainViewModel(
     private val userDataStore: UserDataStore
 ) : ViewModel() {
 
-    // Menyimpan semua makanan dari database dalam bentuk StateFlow
     val makananList: StateFlow<List<Makanan>> = dao.getMakanan()
         .stateIn(
             scope = viewModelScope,
@@ -38,28 +37,17 @@ class MainViewModel(
             initialValue = emptyList()
         )
 
-    // State untuk status pengambilan data dari API
     private val _status = MutableStateFlow(MakananApiStatus.LOADING)
     val status: StateFlow<MakananApiStatus> = _status.asStateFlow()
 
-    // State untuk data makanan yang diambil dari API
     private val _makananListFromApi = MutableStateFlow<List<Makanan>>(emptyList())
     val makananListFromApi: StateFlow<List<Makanan>> = _makananListFromApi.asStateFlow()
 
-    // State untuk pesan error
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
     init {
         getMakananFromApi()
-    }
-
-
-    // ✅ Tambahkan fungsi insert data ke database
-    fun addMakanan(makanan: Makanan) {
-        viewModelScope.launch {
-            dao.insert(makanan)
-        }
     }
 
     fun addMakananToApi(makanan: Makanan, imageFile: File?) {
@@ -99,6 +87,9 @@ class MainViewModel(
                     imageMultipart
                 )
 
+                // Tambahkan log ini untuk melihat respons dari POST
+                Log.d("API_DEBUG", "Respons POST Makanan: $result")
+
                 getMakananFromApi()
                 _status.value = MakananApiStatus.DONE
 
@@ -123,7 +114,7 @@ class MainViewModel(
         }
     }
 
-    fun deleteMakananFromApi(makananId: Int) { // Mengganti nama parameter dari 'id' menjadi 'makananId' untuk kejelasan
+    fun deleteMakananFromApi(makananId: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             _status.value = MakananApiStatus.LOADING
             _errorMessage.value = null
@@ -134,10 +125,10 @@ class MainViewModel(
                 val authHeader = "Bearer $idToken"
                 val userIdValue = user.email
 
-                val response = MakananApi.service.deleteMakanan(makananId, authHeader, userIdValue) // Menggunakan makananId di sini
+                val response = MakananApi.service.deleteMakanan(makananId, authHeader, userIdValue)
                 if (response.isSuccessful) {
                     Log.d("Delete", "Makanan deleted successfully")
-                    getMakananFromApi() // Refresh list setelah hapus
+                    getMakananFromApi()
                 } else {
                     Log.e("Delete", "Error deleting makanan: ${response.code()}")
                     val errorBody = response.errorBody()?.string()
@@ -191,9 +182,8 @@ class MainViewModel(
                     imageMultipart = MultipartBody.Part.createFormData("image", imageFile.name, requestBody)
                 }
 
-                // Panggil fungsi updateMakanan dari MakananApi.service
                 val result = MakananApi.service.updateMakanan(
-                    makanan.id, // ID makanan yang akan diupdate
+                    makanan.id,
                     authHeader,
                     userIdValue,
                     namaPart,
@@ -201,10 +191,13 @@ class MainViewModel(
                     rasaPart,
                     tingkatPedasPart,
                     teksturPart,
-                    imageMultipart // Teruskan gambar multipart (bisa null)
+                    imageMultipart
                 )
 
-                getMakananFromApi() // Ambil ulang untuk memperbarui daftar dengan item baru
+                // Tambahkan log ini untuk melihat respons dari PUT
+                Log.d("API_DEBUG", "Respons PUT Makanan: $result")
+
+                getMakananFromApi()
                 _status.value = MakananApiStatus.DONE
 
             } catch (e: IOException) {
@@ -246,6 +239,11 @@ class MainViewModel(
 
                 val response = MakananApi.service.getMakananList(authHeader, userIdValue)
                 _makananListFromApi.value = response.data
+
+                // Tambahkan log ini untuk melihat respons dari GET
+                Log.d("API_DEBUG", "Respons GET Makanan: $response")
+                Log.d("API_DEBUG", "Data Makanan (jumlah): ${response.data.size}")
+
                 _status.value = MakananApiStatus.DONE
 
             } catch (e: IOException) {
@@ -273,14 +271,12 @@ class MainViewModel(
         }
     }
 
-    // Fungsi cari rekomendasi
     fun cariRekomendasi(
         jenis: String,
         rasa: String,
         tingkatPedas: String,
         tekstur: String
     ): List<Makanan> {
-        // Sekarang ini harus mencari dari _makananListFromApi juga
         return _makananListFromApi.value
             .map { makanan ->
                 var skor = 0

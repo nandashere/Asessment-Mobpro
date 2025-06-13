@@ -6,7 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.anandamartiza0128.makanapaya.model.Makanan
 
-@Database(entities = [Makanan::class], version = 1, exportSchema = false)
+@Database(entities = [Makanan::class], version = 2, exportSchema = false)
 abstract class MakananDb : RoomDatabase() {
 
     abstract val dao: MakananDao
@@ -25,7 +25,10 @@ abstract class MakananDb : RoomDatabase() {
                         context.applicationContext,
                         MakananDb::class.java,
                         "makanan.db"
-                    ).build()
+                    )
+                        // Tambahkan baris ini untuk penanganan migrasi yang merusak selama pengembangan
+                        .fallbackToDestructiveMigration()
+                        .build()
                     INSTANCE = instance
                 }
                 return instance

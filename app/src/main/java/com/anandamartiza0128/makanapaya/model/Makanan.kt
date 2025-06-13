@@ -2,6 +2,7 @@ package com.anandamartiza0128.makanapaya.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.squareup.moshi.Json
 
 @Entity(tableName = "makanan")
 data class Makanan(
@@ -12,7 +13,8 @@ data class Makanan(
     val rasa: String = "",
     val tingkatPedas: String = "",
     val tekstur: String = "",
-    val imageUri: String = ""
+    @Json(name = "full_image_url")
+    val imageUri: String? = null
 )
 
 data class MakananApiResponse(

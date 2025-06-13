@@ -73,7 +73,7 @@ fun TambahMakananScreen(
                 rasa = "",
                 tingkatPedas = "",
                 tekstur = "",
-                imageUri = ""
+                imageUri = null
             )
         )
     }
@@ -150,7 +150,8 @@ fun TambahMakananScreen(
                     .background(Color.LightGray),
                 contentAlignment = Alignment.Center
             ) {
-                if (formState.imageUri.isNotBlank()) {
+                // PERBAIKAN DI SINI: Gunakan safe call operator '?'
+                if (formState.imageUri?.isNotBlank() == true) { // Memastikan tidak null DAN tidak kosong
                     Image(
                         painter = rememberAsyncImagePainter(File(formState.imageUri)),
                         contentDescription = null,
@@ -259,7 +260,7 @@ fun TambahMakananScreen(
                 onClick = {
                     if (formState.nama.isBlank() || formState.jenis.isBlank() || formState.rasa.isBlank() || formState.tingkatPedas.isBlank() || formState.tekstur.isBlank()) {
                         showError = true
-                    } else if (formState.imageUri.isBlank()) {
+                    } else if (formState.imageUri.isNullOrBlank()) { // PERBAIKAN DI SINI: Gunakan isNullOrBlank
                         showImageError = true
                     } else {
                         // Panggil fungsi API baru
@@ -276,7 +277,6 @@ fun TambahMakananScreen(
         }
     }
 }
-
 
 @Composable
 fun FormField(
@@ -304,12 +304,3 @@ fun FormField(
         }
     }
 }
-
-
-//@Preview(showBackground = true)
-//@Composable
-//fun TambahMakananScreenPreview() {
-//    val navController = rememberNavController()
-//
-//    TambahMakananScreen(navController = navController)
-//}
