@@ -246,12 +246,7 @@ fun DetailScreen(
 
             Button(
                 onClick = {
-                    // Panggil fungsi updateMakananInApi dari MainViewModel
-                    // Jika ada gambar baru yang dipilih, kamu juga perlu mengirimnya.
-                    // Saat ini, updateMakananInApi tidak menangani file gambar, hanya data Makanan.
-                    // Kamu perlu menambahkan parameter File? imageFile di updateMakananInApi
-                    // jika kamu ingin mengizinkan perubahan gambar saat update.
-                    viewModel.updateMakananInApi(currentMakananFormState)
+                    viewModel.updateMakananInApi(currentMakananFormState, selectedImageFileForUpload)
                     navController.popBackStack()
                 },
                 modifier = Modifier.fillMaxWidth(),
