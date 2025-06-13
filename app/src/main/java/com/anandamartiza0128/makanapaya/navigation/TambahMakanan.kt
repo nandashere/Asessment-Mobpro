@@ -91,6 +91,8 @@ fun TambahMakananScreen(
     var showError by remember { mutableStateOf(false) }
     var showImageError by remember { mutableStateOf(false) }
 
+    var selectedImageFile: File? by remember { mutableStateOf(null) }
+
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri ->
@@ -101,7 +103,8 @@ fun TambahMakananScreen(
                     "img_${System.currentTimeMillis()}.jpg"
                 )
                 formState = formState.copy(imageUri = copiedPath)
-                showImageError = false // Reset error when an image is picked
+                selectedImageFile = File(copiedPath) // Simpan objek File
+                showImageError = false // Setel ulang kesalahan ketika gambar dipilih
             }
         }
     )
@@ -170,7 +173,7 @@ fun TambahMakananScreen(
                 Text(stringResource(R.string.tambahkan_gambar), color = ceriseColor)
             }
 
-            // Error handling for empty image URI
+            // Penanganan kesalahan untuk URI gambar kosong
             if (showImageError) {
                 Text(
                     text = stringResource(R.string.gambar_kosong),
@@ -254,12 +257,13 @@ fun TambahMakananScreen(
 
             Button(
                 onClick = {
-                    if (formState.nama.isBlank()) {
+                    if (formState.nama.isBlank() || formState.jenis.isBlank() || formState.rasa.isBlank() || formState.tingkatPedas.isBlank() || formState.tekstur.isBlank()) {
                         showError = true
                     } else if (formState.imageUri.isBlank()) {
                         showImageError = true
                     } else {
-                        viewModel.addMakanan(formState)
+                        // Panggil fungsi API baru
+                        viewModel.addMakananToApi(formState, selectedImageFile)
                         navController.popBackStack()
                     }
                 },
